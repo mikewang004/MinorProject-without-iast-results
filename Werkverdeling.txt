@@ -1,0 +1,18 @@
+Input SELFIES:
+  Wessel heeft hier code van
+  
+Support Vector Machine
+  Wessel heeft hier code van, maar moet het nog aanpassen naar een regression model
+
+
+k-NN
+  Hoofdverantwoordelijk: Dariya
+  + Lars
+
+Neural Network
+  Hoofdverantwoordelijk: Steven
+  + Dariya
+
+Random Forest
+  Hoofdverantwoordelijk: Lars
+  + Wessel
