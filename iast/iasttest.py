@@ -22,18 +22,22 @@ ch3ch3_isotherm = pyiast.ModelIsotherm(df_ch3ch3, loading_key = "molkg", pressur
 #pyiast.plot_isotherm(ch3ch3_isotherm)
 #pyiast.plot_isotherm(ch4_isotherm)
 
-ch4_isotherm.print_params()
-ch3ch3_isotherm.print_params()
+#ch4_isotherm.print_params()
+#ch3ch3_isotherm.print_params()
 
-gas_frac = np.array([0.05, 0.95])
+
+gas_frac = np.array([0.10, 0.90])
 total_pressure = np.linspace(0, 10e4, 50)
 mixture = np.zeros([50, 2])
 for i in range(0,50):
     mixture[i] = pyiast.iast(total_pressure[i] * gas_frac, [ch4_isotherm, ch3ch3_isotherm])
 
-plt.plot(total_pressure, mixture[:, 0], color="red")
-plt.plot(total_pressure, mixture[:, 1], color="green")
-plt.title("Loading of a %f - %f % methane -ethane mixture",)
+plt.semilogx(total_pressure, mixture[:, 0], "r+", label=r"$CH_4$, IAST-approx. mixture")
+plt.semilogx(total_pressure, mixture[:, 1], "g+", label=r"$CH_3-CH_3$, IAST-approx. mixture")
+plt.semilogx(total_pressure, ch4_isotherm.loading(total_pressure), "ro", label=r"$CH_4$, homogeneous gas")
+plt.semilogx(total_pressure, ch3ch3_isotherm.loading(total_pressure), "go", label=r"$CH_3-CH_3$, homogeneous gas")
+plt.title("Loading of a %1.0f - %1.0f percent methane/ethane mixture" %(gas_frac[0]*100, gas_frac[1]*100))
 plt.xlabel("Pressure (bar)")
 plt.ylabel("Loading (mol/kg)")
+plt.legend()
 plt.show()
