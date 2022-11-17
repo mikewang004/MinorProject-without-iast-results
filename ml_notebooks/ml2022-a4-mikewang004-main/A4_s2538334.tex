@@ -1,0 +1,81 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{float}
+\usepackage{graphicx}
+
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage[charter]{mathdesign}  % comment out if you want Latin Modern again
+\usepackage[dvipsnames]{xcolor}
+\usepackage{subcaption}
+\usepackage{hyperref}
+
+\newcommand{\Hrule}{\noindent\rule{\textwidth}{0.4pt}}
+\newcommand{\question}[1]{{\large \textcolor{BrickRed}{Question #1}}}
+
+\title{Machine Learning assignment 4}
+\author{TODO: name (student number)}
+\date{< 30 April 2021 (TODO)}
+
+\begin{document}
+
+\maketitle
+
+\question{1: why can the two-dimensional data we stored in \texttt{X} be reconstructed so well using only one principal component?}
+
+
+
+\question{2: make a scatter plot that contains true and reconstructed values $(k=1)$, as well as the single principal component.}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.6\textwidth]{q3.pdf}
+    \caption{}
+    \label{fig:q3}
+\end{figure}
+
+\pagebreak[4]
+
+\question{3: can you come up with a feature transformation (for one or more column(s) of \texttt{big\_X} by looking at \texttt{X\_train}) that would make the principal components express more of the data's variance?}
+
+
+
+\question{4: what is a good number of principal components to continue with \textit{and why}? (Base your answer only on this training set.)}
+
+
+
+\question{5 (2 points): how do the computation time and accuracies differ between the repeated evaluations with and without PCA, and how do you explain this? (Specify $k$ if you do not use the value you chose above.)}
+
+
+
+\question{6 (bonus): test your theory.}
+
+
+
+\pagebreak[4]
+
+\question{7: can you describe a situation where (or model for which) PCA would not help?}
+
+
+
+
+\question{8: make scatterplots of (either train, test, or all) points expressed in terms of 1: the first two principal components; 2: the first two numerical features.}
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{.49\textwidth}
+        \includegraphics[width=\linewidth]{q9_1.pdf}
+    \end{subfigure}
+    \begin{subfigure}{.49\textwidth}
+        \includegraphics[width=\linewidth]{q9_2.pdf}
+    \end{subfigure}
+    \caption{}
+    \label{fig:q9}
+\end{figure}
+
+\question{9 (2 points): what do the first two principal components represent, when you think back to what the numerical features are based on?}
+
+
+
+\end{document}
+
