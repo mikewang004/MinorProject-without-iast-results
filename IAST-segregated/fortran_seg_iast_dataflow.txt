@@ -1,0 +1,21 @@
+Code provided by Shrinjay [insert achternaam] per 2022/11/16. 
+
+A list of all the datafiles and their purposes:
+
+    -   commons.inc: defines all common variables, namely:
+        -   int maxcomp, maxterm, ncomp;
+        -   Nimax(Maxcomp,Maxterm),Ki(Maxcomp,Maxterm) ,Pow(Maxcomp,Maxterm);
+        -   Logical Langmuir(Maxcomp,Maxterm); 
+                seems to return true/false depending if the given isotherm is a Langmuir isotherm;
+                ask what nterm_max is?
+    -   fort.25: output file with each column resp. pressure, loading component 1, loading component 2;
+    -   invp.f: [????];
+    -   isothermpure.f: calculates total pressure? 
+    -   seg_iast.f: contains iast subroutine, returns loading;
+    -   spreading_pressure.f: what it says on the tin;
+    -   testiast.f: input/output for segiast, requires:
+        -   N_term;
+        -   Ni_max;
+        -   Pow: determines physical location of zeolite unit cell;
+        -   Langmuir: [????].
+    
