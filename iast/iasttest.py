@@ -21,11 +21,16 @@ input_path = "../Raspa/outputs/C7"
 #df_ch4 = pd.read_csv("./input/ethaan_iso.txt")
 #df_ch3ch3 = pd.read_csv("./input/methane_iso2.txt")
 
-df_c7_300 = pd.read_csv(input_path + "/C7-300out.txt")
-df_c7_400 = pd.read_csv(input_path + "/C7-400out.txt")
+df_c7_300 = pd.read_csv(input_path + "/C7-400out.txt")
+df_c7_400 = pd.read_csv(input_path + "/C7-500out.txt")
 
 c7_300_iso = return_langmuir(df_c7_300)
 c7_400_iso = return_langmuir(df_c7_400)
+
+#Define labels 
+
+molecule_1 = r"$CH_7-400$"
+molecule_2 = r"$CH_7-500$"
 
 # Fit Langmuir isotherm to dataframe 
 
@@ -43,7 +48,7 @@ c7_400_iso = return_langmuir(df_c7_400)
 
 
 
-gas_frac = np.array([0.10, 0.90])
+#gas_frac = np.array([0.10, 0.90])
 #total_pressure = np.linspace(0, 10e4, 50)
 mixture = np.zeros([50, 2])
 #for i in range(0,50):
@@ -61,27 +66,28 @@ mixture = np.zeros([50, 2])
 #plt.show()
 
 # Now doing the same but for multiple mixtures: 
-no_fracs = 10
+no_fracs = 20
 no_pressures = 50
-gas_frac = np.linspace(0.0, 0.05, no_fracs)
-partial_pressures = np.linspace(0, 10e5, no_pressures)
+gas_frac = np.linspace(0.0, 0.1, no_fracs)
+partial_pressures = np.logspace(0, 6, num=no_pressures)
 mix_isotherm = np.zeros((no_fracs, no_pressures, 2))
 for i in range(0, no_fracs):
     for j in range(0, no_pressures):
         mix_isotherm[i, j] = pyiast.iast(partial_pressures[j] * np.array([gas_frac[i], 1-  gas_frac[i]]), [c7_300_iso, c7_400_iso])
 
-
+print(partial_pressures)
 plt.figure()
 for i in range(1, no_fracs-1):
-    plt.semilogx(partial_pressures, mix_isotherm[i,:, 0], "r+")
-    plt.semilogx(partial_pressures, mix_isotherm[i,:, 1], "g+")
-plt.semilogx(partial_pressures, mix_isotherm[1,:, 0], "rv", label=r"$CH_7-300$, lowest fraction")
-plt.semilogx(partial_pressures, mix_isotherm[1,:, 1], "gv", label=r"$CH_7-400$, highest fraction")
-plt.semilogx(partial_pressures, mix_isotherm[no_fracs-1,:, 0], "r^", label=r"$CH_7-300$, highest fraction")
-plt.semilogx(partial_pressures, mix_isotherm[no_fracs-1,:, 1], "g^", label=r"$CH_7-400$, lowest fraction")
-plt.semilogx(partial_pressures, c7_300_iso.loading(partial_pressures), "ro", label=r"$CH_7-300$, homogeneous gas")
-plt.semilogx(partial_pressures, c7_400_iso.loading(partial_pressures), "go", label=r"$CH_7-400$, homogeneous gas")
-plt.title("Loadings of various ethane/methane mixtures")
+    pass
+    #plt.semilogx(partial_pressures, mix_isotherm[i,:, 0], "r+")
+    #plt.semilogx(partial_pressures, mix_isotherm[i,:, 1], "g+")
+plt.semilogx(partial_pressures, mix_isotherm[1,:, 0], "rv", label=molecule_1 +r", lowest fraction")
+plt.semilogx(partial_pressures, mix_isotherm[1,:, 1], "gv", label=molecule_2 + r", highest fraction")
+plt.semilogx(partial_pressures, mix_isotherm[no_fracs-1,:, 0], "r^", label= molecule_1 + r", highest fraction")
+plt.semilogx(partial_pressures, mix_isotherm[no_fracs-1,:, 1], "g^", label= molecule_2 + r", lowest fraction")
+plt.semilogx(partial_pressures, c7_300_iso.loading(partial_pressures), "ro", label=molecule_1 + r", homogeneous gas")
+plt.semilogx(partial_pressures, c7_400_iso.loading(partial_pressures), "go", label=molecule_2 + r", homogeneous gas")
+plt.title("Loadings of a " + molecule_1 + " and " + molecule_2 +  " mixture")
 plt.xlabel("Pressure (bar)")
 plt.ylabel("Loading (mol/kg)")
 plt.legend()
