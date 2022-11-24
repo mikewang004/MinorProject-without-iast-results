@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import pandas as pd 
+import matplotlib.pyplot as plt
+import pyiast 
+
+input_path = "../../Raspa/outputs/"
+
+def return_langmuir(df_iso):
+    return pyiast.ModelIsotherm(df_iso, loading_key = "molkg", pressure_key = "pressure", model = "DSLangmuir")
+
+molecule_1 = r"$CH_7$"
+molecule_2 = r"$3mC6$"
+temp = r"$400 K$"
+
+moleculeiso_1 = return_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"))
+moleculeiso_2 = return_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"))
+
+moleculeiso_1.print_params()
+moleculeiso_2.print_params()
+
+#Write params to fortran-file 
+
+with open("testiast.f", "r+") as file:
+    data = file.readlines()
+
+
+
+#Read and plot output fortran-file 
+
+output = np.loadtxt("fort.25")
+
+plt.scatter(output[:, 0], output[:,1])
+plt.scatter(output[:, 0], output[:, 2])
+plt.show()
