@@ -13,11 +13,11 @@ C     Nterm=1
 C     Langmuir=True
 C     Ki=0
 C     Nimax Not Equal To Zero
-C     Nterm_max means max no. of sides in pure-component isotherms. 
+C     Nterm_max means max no. of sides in pure-component isotherms.
 C     Start for Python
       Ncomp = 2
       Nterm_max = 2
-
+ 
 
 C     C7
       Ki(1,1)       = 0.529536d0

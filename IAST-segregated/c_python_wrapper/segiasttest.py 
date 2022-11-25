@@ -15,7 +15,7 @@ def return_langmuir(df_iso):
 molecule_1 = r"$CH_7$"
 molecule_2 = r"$3mC6$"
 temp = r"$400 K$"
-
+no_components = 2 
 moleculeiso_1 = return_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"))
 moleculeiso_2 = return_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"))
 
@@ -37,7 +37,8 @@ print(startnum, stopnum)
 del data[startnum:stopnum-1]
 print(data)
 
-
+for i in range(startnum + 1, startnum + 11 * no_components):
+    
 
 #Read and plot output fortran-file 
 
