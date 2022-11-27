@@ -7,6 +7,8 @@ Created on Sat Nov  5 21:21:43 2022
 
 import selfies as sf
 import numpy as np
+import os
+import pandas as pd
 
 
 def ML_database():
@@ -38,3 +40,24 @@ def ML_database():
     return molecular_database
 
 
+def data_gathering(path_to_output):
+    data = {}
+    outputmaps = os.listdir(path_to_output)
+    for outputmap in outputmaps:
+        mappath = path_to_output + "/" + str(outputmap)
+        if os.path.isdir(mappath):
+            files = os.listdir(mappath)
+            for file in files:
+                
+                try:
+                    
+                    paths =  mappath + "/" + str(file)
+                    label = file.split("out")[0]
+                    df = pd.read_table(paths, delimiter = ",")
+                    data[label] = df.drop("_", axis = 1)
+                except:
+                    print("ERROR !!!, please check " + file + " \n")
+                
+
+    return data
+        
