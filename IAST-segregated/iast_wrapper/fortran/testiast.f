@@ -20,20 +20,20 @@ C     Start for Python
 
 
 C     C7
-      Ki(1,1)       = 0.529536d0
-      Ki(1,2)       = 0.685660d0
-      Nimax(1,1)    = 0.075591d0
-      Nimax(1,2)    = 292.889202d0
+      Ki(1,1)       = 3.4672779d-04
+      Ki(1,2)       = 1.23657292d-08
+      Nimax(1,1)    = 0.6872872d0
+      Nimax(1,2)    = 0.73993657d0
       Pow(1,1)      = 1.0d0
       Pow(1,2)      = 1.0d0
       Langmuir(1,1) = .True.
       Langmuir(1,2) = .True.      
 
-C     2mC6 
-      Ki(2,1)       = 0.055617d0
-      Ki(2,2)       = 0.000234d0
-      Nimax(2,1)    = 0.698642d0
-      Nimax(2,2)    = 36.891289d0
+C     3mC6 
+      Ki(2,1)       = 0.139027312d-3
+      Ki(2,2)       = 0.0d0
+      Nimax(2,1)    = 0.69564439d0
+      Nimax(2,2)    = 0.1d0
       Pow(2,1)      = 1.0d0
       Pow(2,2)      = 1.0d0
       Langmuir(2,1) = .True.
@@ -44,15 +44,15 @@ C     2mC6
       Carrier_gas = 1       
       P   = 1.0d4
 C     Mole fractions below
-      Yi(1) = 0.50d0
-      Yi(2) = 0.50d0      
+      Yi(1) = 0.60d0
+      Yi(2) = 0.40d0      
 C      Yi(3) = 0.50d0      
 
 C     End for Python
       Call Seg_Iast(Ni,Xi1,Molfrac,Yi,P,Nterm_max,Carrier_gas)
 
       write(6,*) 'Ni(2)   ','Ni(3)   '
-      write(6,'(2e20.10)') Ni(2),Ni(3)
+      write(6,'(2e20.10)') Ni(1),Ni(2)
 
 C      stop
 
@@ -61,12 +61,12 @@ C      stop
             Do I = 1, 3, 2
                P = Dble(I*10**J)
                Call Seg_Iast(Ni,Xi1,Molfrac,Yi,P,Nterm_max,Carrier_gas)
-               Write(25,'(5e20.10)') P,Ni(2),Ni(3)
+               Write(25,'(5e20.10)') P,Ni(1),Ni(2)
             Enddo
          Else
             P = Dble(1.0*10**J)
             Call Seg_Iast(Ni,Xi1,Molfrac,Yi,P,Nterm_max,Carrier_gas)
-            Write(25,'(5e20.10)') P,Ni(2),Ni(3)
+            Write(25,'(5e20.10)') P,Ni(1),Ni(2)
          Endif
       Enddo
       
