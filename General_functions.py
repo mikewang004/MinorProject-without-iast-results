@@ -15,8 +15,8 @@ def ML_database():
     
     
     "Creating the smiles and name arrays"
-    molecule_names = ['Heptane',"2-Methylhexane",'3-Methylhexane','2,2-Dimethylpentane',"2,3-Dimethylpentane",'2,4-Dimethylpentane',"3,3-Dimethylpentane",  "3-Ethylpentane",   "2,2,3-trimethylbutane"]
-    smiles_dataset = ["CCCCCCC", "CCCCC(C)C"    , "CCCC(C)CC"   , "CCCC(C)(C)C"         ,"CCC(C)C(C)C"          , "CC(C)CC(C)C"     ,"CCC(C)(C)CC",         "CCC(CC)CC"         ,"CC(C)C(C)(C)C"]
+    molecule_names = ['C7',"2mC6",'3mC6','22mC5',"23mC5",'24mC5',"33mC5",  "3eC5",   "223mC4"]
+    smiles_dataset = ["CCCCCCC", "CCCCC(C)C" ,"CCCC(C)CC" , "CCCC(C)(C)C" ,"CCC(C)C(C)C" , "CC(C)CC(C)C" ,"CCC(C)(C)CC","CCC(CC)CC" ,"CC(C)C(C)(C)C"]
     selfies_dataset = list(map(sf.encoder, smiles_dataset)) #transforming to selfies
     
     
@@ -58,4 +58,7 @@ def data_gathering(path_to_output):
                 
 
     return data
+
+ML_database()
+
         
