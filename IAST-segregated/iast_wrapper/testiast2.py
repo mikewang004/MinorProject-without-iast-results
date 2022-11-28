@@ -10,20 +10,23 @@ import os
 
 startnum, stopnum = 0,0
 input_path = "../../Raspa/outputs/"
-
-def return_langmuir(df_iso):
-    return pyiast.ModelIsotherm(df_iso, loading_key = "molkg", pressure_key = "pressure", model = "DSLangmuir")
-
+input_path_nieuw = "../../Raspa/nieuwe_outputs/"
+mol_1_path = input_path_nieuw + "22mC5/22mC5-300out.txt"
+mol_2_path = input_path_nieuw + "23mC5/23mC5-300out.txt"
+molecule_1 = r"$22mC5$"
+molecule_2 = r"$23mC5$"
+temp = r"$300 K$"
+no_components = 2 
 
 def DSLangmuir(ab, k1, qsat1, k2, qsat2):
     k1ab, k2ab = k1 * ab, k2 * ab
     return (qsat1 * k1ab / ( 1 + k1ab)) + (qsat2 * k2ab / (1 + k2ab))
 
-def fit_DS_langmuir(df_iso, p0):
+def fit_DS_langmuir(path, p0):
+    df_iso = pd.read_csv(path)
     molkg = df_iso["molkg"]
     pressure = df_iso["pressure"]
     popt, pcov = sp.optimize.curve_fit(DSLangmuir, pressure, molkg, p0=p0)
-    #print(q_tot, ab)
     print(popt)
     return popt
 
@@ -32,35 +35,28 @@ def return_molkg_pressure(df_iso):
     ab = df_iso["pressure"]
     return q_tot, ab
 
-molecule_1 = r"$CH_7$"
-molecule_2 = r"$3mC6$"
-temp = r"$500 K$"
-no_components = 2 
-#moleculeiso_1 = return_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"))
-#moleculeiso_2 = return_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"))
 
-#moleculeiso_1.print_params()
-#moleculeiso_2.print_params()
 
-mol_1_iso = fit_DS_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"), [1.0e-5, 0.701, 1.0e-4, 1.0])
-mol_2_iso = fit_DS_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"), [1.0e-11, 0.6, 1.0e-6, 0.8])
+
+#mol_1_iso = fit_DS_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"), [1.0e-5, 0.701, 1.0e-4, 1.0])
+#mol_2_iso = fit_DS_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"), [1.0e-11, 0.6, 1.0e-6, 0.8])
+mol_1_iso = fit_DS_langmuir(mol_1_path, [1.0e-11, 0.7, 1.0e-6, 0.7])
+mol_2_iso = fit_DS_langmuir(mol_2_path, [1.0e-6, 0.7, 1.0e-5, 0.7])
 
 no_fracs = 2
-no_pressures = 19
+
 gas_frac = np.linspace(0.5, 0.5, no_fracs)
-partial_pressures = np.logspace(0, 9, num=no_pressures)
-partial_pressures2 = np.logspace(0, 9, num=25)
-mol1para = return_molkg_pressure(pd.read_csv(input_path + "C7/C7-500out.txt"))
-mol2para = return_molkg_pressure(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"))
-#plt.semilogx(partial_pressures, DSLangmuir(mol1para[1], mol_1_iso[0], mol_1_iso[1], mol_1_iso[2], mol_1_iso[3]), "ro", label=molecule_1 + r", homogeneous gas")
+mol1para = return_molkg_pressure(pd.read_csv(mol_1_path))
+mol2para = return_molkg_pressure(pd.read_csv(mol_2_path))
+#plt.semilogx(mol1para[1], DSLangmuir(mol1para[1], mol_1_iso[0], mol_1_iso[1], mol_1_iso[2], mol_1_iso[3]), "ro", label=molecule_1 + r", homogeneous gas")
 #plt.semilogx(mol1para[1], mol1para[0], "go")
-plt.semilogx(mol2para[1], mol2para[0], "bo")
-plt.semilogx(partial_pressures2, DSLangmuir(mol2para[1], mol_2_iso[0], mol_2_iso[1], mol_2_iso[2], mol_2_iso[3]), "r.", label=molecule_2 + r", homogeneous gas")
-plt.title("Loadings of a " + molecule_1 + " and " + molecule_2 +  " mixture at temperature " + temp)
-plt.xlabel("Pressure (Pascal)")
-plt.ylabel("Loading (mol/kg)")
-plt.legend()
-plt.show()
+#plt.semilogx(mol2para[1], mol2para[0], "bo")
+#plt.semilogx(mol2para[1], DSLangmuir(mol2para[1], mol_2_iso[0], mol_2_iso[1], mol_2_iso[2], mol_2_iso[3]), "r.", label=molecule_2 + r", homogeneous gas")
+#plt.title("Loadings of a " + molecule_1 + " and " + molecule_2 +  " mixture at temperature " + temp)
+#plt.xlabel("Pressure (Pascal)")
+#plt.ylabel("Loading (mol/kg)")
+#plt.legend()
+#plt.show()
 
 #Write params to fortran-file 
 startline, stopline = 'C     Start for Python', 'C     End for Python'
