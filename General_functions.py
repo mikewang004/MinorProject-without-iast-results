@@ -52,6 +52,7 @@ def data_gathering(path_to_output):
                     paths =  mappath + "/" + str(file)
                     label = file.split("out")[0]
                     df = pd.read_table(paths, delimiter = ",")
+                    df = df.set_index("pressure")
                     data[label] = df.drop("_", axis = 1)
                 except:
                     print("ERROR !!!, please check " + file + " \n")
@@ -59,6 +60,9 @@ def data_gathering(path_to_output):
 
     return data
 
-ML_database()
+
+
+
+    
 
         
