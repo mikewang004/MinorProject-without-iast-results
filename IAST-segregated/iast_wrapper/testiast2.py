@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pyiast 
 import scipy as sp
+import os 
 
 startnum, stopnum = 0,0
 input_path = "../../Raspa/outputs/"
@@ -42,7 +43,7 @@ no_components = 2
 #moleculeiso_2.print_params()
 
 mol_1_iso = fit_DS_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"), [1.0e-5, 0.701, 1.0e-4, 1.0])
-mol_2_iso = fit_DS_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"), [1.0e-5, 0.701, 1.0e-13, 0.7])
+mol_2_iso = fit_DS_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"), [1.0e-11, 0.6, 1.0e-6, 0.8])
 
 no_fracs = 2
 no_pressures = 19
@@ -66,6 +67,7 @@ startline, stopline = 'C     Start for Python', 'C     End for Python'
 with open("fortran/testiast.f", "r+") as file:
     data = file.readlines()
 
+os.remove("fortran/testiast.f")
 for num, line in enumerate(data, 1):
     if startline in line:
         startnum = num
@@ -78,25 +80,30 @@ del data[startnum:stopnum-1]
 
 #for i in range(startnum + 1, startnum + 11 * no_components):
 
-data.insert(startnum, "Ki(%dd0, %dd0) = %fd0 \n" % (1, 1, mol_1_iso[0]))
-data.insert(startnum, "Ki(%dd0, %dd0) = %fd0 \n" % (1, 2, mol_1_iso[2]))
-data.insert(startnum, "Nimax(%dd0, %dd0) = %fd0 \n" % (1, 1, mol_1_iso[1]))
-data.insert(startnum, "Nimax(%dd0, %dd0) = %fd0 \n" % (1, 2, mol_1_iso[3]))
-data.insert(startnum, "Ki(%dd0, %dd0) = %fd0 \n" % (2, 1, mol_2_iso[0]))
-data.insert(startnum, "Ki(%dd0, %dd0) = %fd0 \n" % (2, 2, mol_2_iso[2]))
-data.insert(startnum, "Nimax(%dd0, %dd0) = %fd0 \n" % (2, 1, mol_2_iso[1]))
-data.insert(startnum, "Nimax(%dd0, %dd0) = %fd0 \n" % (2, 2, mol_2_iso[3]))
-for i in range(1, 2):
-    data.insert(startnum, "Pow(%dd0, 1.0d0) = 1.0d0" %(i))
-    data.insert(startnum, "Pow(%d0, 2.0d0) = 1.0d0" %(i))
-    data.insert(startnum, "Langmuir(1,1) = .True.")
-    data.insert(startnum, "Langmuir(1,2) = .True.")
+data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 1, mol_1_iso[0]))
+data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 2, mol_1_iso[2]))
+data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (1, 1, mol_1_iso[1]))
+data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (1, 2, mol_1_iso[3]))
+data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (2, 1, mol_2_iso[0]))
+data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (2, 2, mol_2_iso[2]))
+data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (2, 1, mol_2_iso[1]))
+data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (2, 2, mol_2_iso[3]))
+for i in range(1, 3):
+    data.insert(startnum, "      Pow(%d, 1) = 1.0d0 \n" %(i))
+    data.insert(startnum, "      Pow(%d, 2) = 1.0d0 \n" %(i))
+    data.insert(startnum, "      Langmuir(1, 1) = .True. \n")
+    data.insert(startnum, "      Langmuir(1, 2) = .True. \n")
 
 
 #print(data)
+
+with open("fortran/testiast.f", "a") as file:
+    for num, line in enumerate(data, 1):
+        file.write(line)
+
 #Read and plot output fortran-file 
 
-output = np.loadtxt("fortran/fort.25")
+#output = np.loadtxt("fortran/fort.25")
 
 #plt.scatter(output[:, 0], output[:,1])
 #plt.scatter(output[:, 0], output[:, 2])

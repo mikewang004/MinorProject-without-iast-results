@@ -9,9 +9,11 @@ import scipy as sp
 
 data = np.loadtxt("fort.25")
 
-for i in range(0, 10):
-    plt.loglog(data[:, 0], data[:, 1], label="component 1")
-    plt.loglog(data[:, 0], data[:, 2], label="component 2 ")
 
-#plt.legend()
+plt.loglog(data[:, 0], data[:, 1], label="component 1")
+plt.loglog(data[:, 0], data[:, 2], label="component 2 ")
+
+plt.xlabel("Pressure (pascal)")
+plt.ylabel("Loading (mol/kg)")
+plt.legend()
 plt.show()

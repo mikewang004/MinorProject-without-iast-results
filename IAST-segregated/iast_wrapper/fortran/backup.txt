@@ -14,37 +14,41 @@ C     Langmuir=True
 C     Ki=0
 C     Nimax Not Equal To Zero
 C     Nterm_max means max no. of sides in pure-component isotherms. 
-
+C     Start for Python
       Ncomp = 2
       Nterm_max = 2
 
-C     Start for Python
-      Langmuir(1, 2) = .True. 
-      Langmuir(1, 1) = .True. 
-      Pow(2, 2) = 1.0d0 
-      Pow(2, 1) = 1.0d0 
-      Langmuir(1, 2) = .True. 
-      Langmuir(1, 1) = .True. 
-      Pow(1, 2) = 1.0d0 
-      Pow(1, 1) = 1.0d0 
-      Nimax(2, 2) = 0.660502d0 
-      Nimax(2, 1) = 0.861956d0 
-      Ki(2, 2) = 0.00016050593d0 
-      Ki(2, 1) = 0.00000000299d0 
-      Nimax(1, 2) = 0.685099d0 
-      Nimax(1, 1) = 0.709262d0 
-      Ki(1, 2) = 0.00035012720d0 
-      Ki(1, 1) = 0.00000001306d0 
-C     End for Python
-      Carrier_gas = 1 
+
+C     C7
+      Ki(1,1)       = 3.4672779d-04
+      Ki(1,2)       = 1.23657292d-08
+      Nimax(1,1)    = 0.6872872d0
+      Nimax(1,2)    = 0.73993657d0
+      Pow(1,1)      = 1.0d0
+      Pow(1,2)      = 1.0d0
+      Langmuir(1,1) = .True.
+      Langmuir(1,2) = .True.      
+
+C     3mC6 
+      Ki(2,1)       = 0.139027312d-3
+      Ki(2,2)       = 0.0d0
+      Nimax(2,1)    = 0.69564439d0
+      Nimax(2,2)    = 0.1d0
+      Pow(2,1)      = 1.0d0
+      Pow(2,2)      = 1.0d0
+      Langmuir(2,1) = .True.
+      Langmuir(2,2) = .True.
+      
+
+
+      Carrier_gas = 1       
       P   = 1.0d4
-
+C     Mole fractions below
       Yi(1) = 0.60d0
-      Yi(2) = 0.40d0
+      Yi(2) = 0.40d0      
+C      Yi(3) = 0.50d0      
 
-
-
-
+C     End for Python
       Call Seg_Iast(Ni,Xi1,Molfrac,Yi,P,Nterm_max,Carrier_gas)
 
       write(6,*) 'Ni(2)   ','Ni(3)   '
