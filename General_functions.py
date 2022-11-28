@@ -60,9 +60,7 @@ def data_gathering(path_to_output):
 
     return data
 
-
+ML_database()
 
 
     
-
-        
