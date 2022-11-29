@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 import pyiast 
 import scipy as sp
 
-data = np.loadtxt("fort.25")
+data = np.loadtxt("fort.25", skiprows=1)
 
 
-plt.loglog(data[:, 0], data[:, 1], "go", label="component 1")
-plt.loglog(data[:, 0], data[:, 2], "ro", label="component 2 ")
+plt.loglog(data[1:, 0], data[1:, 1], "go", label="component 1")
+plt.loglog(data[1:, 0], data[1:, 2], "ro", label="component 2 ")
 
 plt.xlabel("Pressure (pascal)")
 plt.ylabel("Loading (mol/kg)")

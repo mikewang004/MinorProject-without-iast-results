@@ -7,12 +7,15 @@ import matplotlib.pyplot as plt
 import pyiast 
 import scipy as sp
 import os 
+import subprocess
 
 startnum, stopnum = 0,0
 input_path = "../../Raspa/outputs/"
 input_path_nieuw = "../../Raspa/nieuwe_outputs/"
-mol_1_path = input_path_nieuw + "22mC5/22mC5-300out.txt"
-mol_2_path = input_path_nieuw + "23mC5/23mC5-300out.txt"
+mol_1_path = input_path + "C7/C7-500out.txt"
+mol_2_path = input_path + "3mC6/3mC6-500out.txt"
+#mol_1_path = input_path_nieuw + "22mC5/22mC5-300out.txt"
+#mol_2_path = input_path_nieuw + "23mC5/23mC5-300out.txt"
 molecule_1 = r"$22mC5$"
 molecule_2 = r"$23mC5$"
 temp = r"$300 K$"
@@ -37,17 +40,18 @@ def return_molkg_pressure(df_iso):
 
 
 
-
-#mol_1_iso = fit_DS_langmuir(pd.read_csv(input_path + "C7/C7-500out.txt"), [1.0e-5, 0.701, 1.0e-4, 1.0])
-#mol_2_iso = fit_DS_langmuir(pd.read_csv(input_path + "3mC6/3mC6-500out.txt"), [1.0e-11, 0.6, 1.0e-6, 0.8])
-mol_1_iso = fit_DS_langmuir(mol_1_path, [1.0e-11, 0.7, 1.0e-6, 0.7])
-mol_2_iso = fit_DS_langmuir(mol_2_path, [1.0e-6, 0.7, 1.0e-5, 0.7])
-
-no_fracs = 2
-
-gas_frac = np.linspace(0.5, 0.5, no_fracs)
+mol_1_iso = fit_DS_langmuir(mol_1_path, [1.0e-5, 0.701, 1.0e-4, 1.0]) #C7-500
+mol_2_iso = fit_DS_langmuir(mol_2_path, [1.0e-11, 0.6, 1.0e-6, 0.8]) #3mC6-500
 mol1para = return_molkg_pressure(pd.read_csv(mol_1_path))
 mol2para = return_molkg_pressure(pd.read_csv(mol_2_path))
+
+
+#mol_1_iso = fit_DS_langmuir(mol_1_path, [1.0e-5, 0.7, 1.0e-12, 0.6])
+#mol_2_iso = fit_DS_langmuir(mol_2_path, [1.0e-6, 0.7, 1.0e-5, 0.7])
+
+
+
+
 #plt.semilogx(mol1para[1], DSLangmuir(mol1para[1], mol_1_iso[0], mol_1_iso[1], mol_1_iso[2], mol_1_iso[3]), "ro", label=molecule_1 + r", homogeneous gas")
 #plt.semilogx(mol1para[1], mol1para[0], "go")
 #plt.semilogx(mol2para[1], mol2para[0], "bo")
@@ -57,50 +61,57 @@ mol2para = return_molkg_pressure(pd.read_csv(mol_2_path))
 #plt.ylabel("Loading (mol/kg)")
 #plt.legend()
 #plt.show()
-
+def seg_iast_routine(gas_frac_1, gas_frac_2, mol_1_iso, mol_2_iso):
 #Write params to fortran-file 
-startline, stopline = 'C     Start for Python', 'C     End for Python'
-with open("fortran/testiast.f", "r+") as file:
-    data = file.readlines()
+    startline, stopline = 'C     Start for Python', 'C     End for Python'
+    with open("fortran/testiast.f", "r+") as file:
+        data = file.readlines()
 
-os.remove("fortran/testiast.f")
-for num, line in enumerate(data, 1):
-    if startline in line:
-        startnum = num
-    elif stopline in line:
-        stopnum = num
-
-print(startnum, stopnum)
-del data[startnum:stopnum-1]
-#print(data)
-
-#for i in range(startnum + 1, startnum + 11 * no_components):
-
-data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 1, mol_1_iso[0]))
-data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 2, mol_1_iso[2]))
-data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (1, 1, mol_1_iso[1]))
-data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (1, 2, mol_1_iso[3]))
-data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (2, 1, mol_2_iso[0]))
-data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (2, 2, mol_2_iso[2]))
-data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (2, 1, mol_2_iso[1]))
-data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (2, 2, mol_2_iso[3]))
-for i in range(1, 3):
-    data.insert(startnum, "      Pow(%d, 1) = 1.0d0 \n" %(i))
-    data.insert(startnum, "      Pow(%d, 2) = 1.0d0 \n" %(i))
-    data.insert(startnum, "      Langmuir(1, 1) = .True. \n")
-    data.insert(startnum, "      Langmuir(1, 2) = .True. \n")
-
-
-#print(data)
-
-with open("fortran/testiast.f", "a") as file:
+    os.remove("fortran/testiast.f")
     for num, line in enumerate(data, 1):
-        file.write(line)
+        if startline in line:
+            startnum = num
+        elif stopline in line:
+            stopnum = num
+        elif 'C     Python marker 4':
+            markernum = num
+        elif 'end':
+            endnum = num
+    print(startnum, stopnum)
+    del data[startnum:stopnum-1]
+    #print(data)
 
-#Read and plot output fortran-file 
+    #for i in range(startnum + 1, startnum + 11 * no_components):
+    data.insert(startnum, "      Yi(%d) = %.2fd0      \n" % (2, gas_frac_2))
+    data.insert(startnum, "      Yi(%d) = %.2fd0      \n" % (1, gas_frac_1))
+    data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 1, mol_1_iso[0]))
+    data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 2, mol_1_iso[2]))
+    data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (1, 1, mol_1_iso[1]))
+    data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (1, 2, mol_1_iso[3]))
+    data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (2, 1, mol_2_iso[0]))
+    data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (2, 2, mol_2_iso[2]))
+    data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (2, 1, mol_2_iso[1]))
+    data.insert(startnum, "      Nimax(%d, %d) = %fd0 \n" % (2, 2, mol_2_iso[3]))
+    for i in range(1, 3):
+        data.insert(startnum, "      Pow(%d, 1) = 1.0d0 \n" %(i))
+        data.insert(startnum, "      Pow(%d, 2) = 1.0d0 \n" %(i))
+        data.insert(startnum, "      Langmuir(1, 1) = .True. \n")
+        data.insert(startnum, "      Langmuir(1, 2) = .True. \n")
 
-#output = np.loadtxt("fortran/fort.25")
 
-#plt.scatter(output[:, 0], output[:,1])
-#plt.scatter(output[:, 0], output[:, 2])
-#plt.show()
+
+    with open("fortran/testiast.f", "a") as file:
+        for num, line in enumerate(data, 1):
+            file.write(line)
+
+
+    subprocess.call(['sh', './seg_iast.sh'])
+
+    #Move and rename current file 
+
+    os.rename('fortran/fort.25', "../output/C7-500_3mC6-500/C7-500-%.2f_3mC6-500-%.2f.txt" %(gas_frac_1, gas_frac_2))
+
+maxnofrac = 50
+gasfrac = np.array([np.linspace(0, 1, maxnofrac), np.linspace(1, 0, maxnofrac)])
+for i in range(0, maxnofrac):
+    seg_iast_routine(gasfrac[0][i], gasfrac[1][i], mol_1_iso, mol_2_iso)
