@@ -1,1 +1,19 @@
 Datafileoutput. 
+    Dit is de output van de IAST-segregated methode; op het moment bestaat
+bestaat hij uit de simulatie van 2 moleculen, namelijk C7 en 3mC6, op 500K. 
+Als input heb ik /Raspa/outputs/C7/C7-500out.txt resp 
+/Raspa/outputs/3mC6/3mC6-500out.txt gebruikt. 
+
+Workflowtoelichting. 
+    Als input gebruik ik de loading (mol/kg) en de druk (Pa) van elke pure-
+componentisotherm. Deze fit ik eerst aan een zogenaamde Dual-Side Langmuir
+Equation (zie wikipedia voor de preciese vergelijking), zodat we de
+continue datapunten kunnen berekenen. Daarna gebruik ik Seg-IAST om de 
+loading van beide moleculen in een gasmix bestaande alleen uit beide 
+moleculen te berekenen. Het resultaat hiervan staat in de output-folder hier.
+
+Bestandsnaamtoelichting.
+    De bestandsnamen hebben volgende syntax:
+    molecuul-temperatuur-bijbehorende molfractie_molecuul2-temperatuur- bijbehorende molfractie
+Dus bijvoorbeeld voor C7-500-0.24_3mC6-500-0.76.txt geldt dat de molfractie van C7-500 hier
+24/100ste is en die van 3mC6-500 76/100ste is. 
