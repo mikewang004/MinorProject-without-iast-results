@@ -39,6 +39,21 @@ def ML_database():
 
     return molecular_database
 
+def simple_database():
+    database = {}
+    # array [c atomen, hoeveel braches, hoeveel c atomen in branches]
+    database["C7"] = np.array([7,0,0])
+    database["2mC6"] = np.array([7,1,1])
+    database["3mC6"] = np.array([7,1,1])
+    database['22mC5'] = np.array([7,2,1])
+    database["23mC5"] = np.array([7,2,1])
+    database['24mC5'] = np.array([7,2,1])
+    database['33mC5'] = np.array([7,2,1])
+    database["3eC5"] = np.array([7,1,2])
+    database['223mC4'] = np.array([7,3,1])
+    
+    return database
+
 
 def data_gathering(path_to_output):
     data = {}
@@ -51,16 +66,17 @@ def data_gathering(path_to_output):
                 try:
                     paths =  mappath + "/" + str(file)
                     label = file.split("out")[0]
+                   #print(label)
                     df = pd.read_table(paths, delimiter = ",")
                     #df = df.set_index("pressure")
-                    data[label] = df.drop("_", axis = 1)
+                    data[label] = df.drop(["_","muc", "muc_err"], axis = 1)
+                    #print(data)
                 except:
                     print("ERROR !!!, please check " + file + " \n")
-                
 
     return data
 
-ML_database()
+data = data_gathering("Raspa/outputs")
 
 
     
