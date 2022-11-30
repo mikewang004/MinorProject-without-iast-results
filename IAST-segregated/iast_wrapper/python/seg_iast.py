@@ -9,6 +9,14 @@ import scipy as sp
 import os 
 import subprocess
 
+
+def fit_DS_langmuir(df_iso, p0):
+    molkg = df_iso["molkg"]
+    pressure = df_iso["pressure"]
+    popt, pcov = sp.optimize.curve_fit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+    print(popt)
+    return popt
+
 def seg_iast_routine(gas_frac_1, gas_frac_2, mol_1_iso, mol_2_iso, iso_name_1, iso_name_2):
 #Write params to fortran-file 
     startline, stopline = 'C     Start for Python', 'C     End for Python'
@@ -60,3 +68,5 @@ def seg_iast_routine(gas_frac_1, gas_frac_2, mol_1_iso, mol_2_iso, iso_name_1, i
     os.rename('../fortran/fort.25', "../../output/%s_%s/%s-%.2f_%s-%.2f.txt" %(iso_name_1, iso_name_2, iso_name_1, gas_frac_1, iso_name_2, gas_frac_2))
     #Return 0 for no error
     return 0;
+
+temps_array = np.array([300, 400, 500])
