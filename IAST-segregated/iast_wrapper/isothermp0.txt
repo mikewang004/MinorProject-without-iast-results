@@ -1,0 +1,16 @@
+List of working p0 values for various isotherms.
+
+For Dual-Side Langmuir fit, criteria are as follows: 
+    -   all four parameters need to be positive;
+    -   k1 order of magnitude 10e-1 < 10e-12 or so;
+    -   q1max about 0.6-0.8, ideally 0.7;
+    -   for k2, q2max same requirements apply OR they can be 0 (note fortran does not support this so value has to have some offset).
+
+
+List of working p0 values:
+
+    isotherm        p0
+    22mC6-500       [1.0e-4, 0.2, 1.0e-4, 0.6]
+    23mC6-500       [1.0e-2, 0.5, 1.0e-4, 0.2]
+    3mC6-500        [1.0e-11, 0.6, 1.0e-6, 0.8]
+    C7-500          [1.0e-5, 0.701, 1.0e-4, 1.0]

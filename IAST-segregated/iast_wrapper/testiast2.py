@@ -115,5 +115,5 @@ plt.show()
 
 maxnofrac = 50
 gasfrac = np.array([np.linspace(0, 1, maxnofrac), np.linspace(1, 0, maxnofrac)])
-for i in range(0, maxnofrac):
-    seg_iast_routine(gasfrac[0][i], gasfrac[1][i], mol_1_iso, mol_2_iso)
+#for i in range(0, maxnofrac):
+    #seg_iast_routine(gasfrac[0][i], gasfrac[1][i], mol_1_iso, mol_2_iso)
