@@ -15,8 +15,8 @@ def ML_database():
     
     
     "Creating the smiles and name arrays"
-    molecule_names = ['Heptane',"2-Methylhexane",'3-Methylhexane','2,2-Dimethylpentane',"2,3-Dimethylpentane",'2,4-Dimethylpentane',"3,3-Dimethylpentane",  "3-Ethylpentane",   "2,2,3-trimethylbutane"]
-    smiles_dataset = ["CCCCCCC", "CCCCC(C)C"    , "CCCC(C)CC"   , "CCCC(C)(C)C"         ,"CCC(C)C(C)C"          , "CC(C)CC(C)C"     ,"CCC(C)(C)CC",         "CCC(CC)CC"         ,"CC(C)C(C)(C)C"]
+    molecule_names = ['C7',"2mC6",'3mC6','22mC5',"23mC5",'24mC5',"33mC5",  "3eC5",   "223mC4"]
+    smiles_dataset = ["CCCCCCC", "CCCCC(C)C" ,"CCCC(C)CC" , "CCCC(C)(C)C" ,"CCC(C)C(C)C" , "CC(C)CC(C)C" ,"CCC(C)(C)CC","CCC(CC)CC" ,"CC(C)C(C)(C)C"]
     selfies_dataset = list(map(sf.encoder, smiles_dataset)) #transforming to selfies
     
     
@@ -39,6 +39,21 @@ def ML_database():
 
     return molecular_database
 
+def simple_database():
+    database = {}
+    # array [c atomen, hoeveel braches, hoeveel c atomen in branches]
+    database["C7"] = np.array([7,0,0])
+    database["2mC6"] = np.array([7,1,1])
+    database["3mC6"] = np.array([7,1,1])
+    database['22mC5'] = np.array([7,2,1])
+    database["23mC5"] = np.array([7,2,1])
+    database['24mC5'] = np.array([7,2,1])
+    database['33mC5'] = np.array([7,2,1])
+    database["3eC5"] = np.array([7,1,2])
+    database['223mC4'] = np.array([7,3,1])
+    
+    return database
+
 
 def data_gathering(path_to_output):
     data = {}
@@ -51,11 +66,17 @@ def data_gathering(path_to_output):
                 try:
                     paths =  mappath + "/" + str(file)
                     label = file.split("out")[0]
+                   #print(label)
                     df = pd.read_table(paths, delimiter = ",")
-                    data[label] = df.drop("_", axis = 1)
+                    #df = df.set_index("pressure")
+                    data[label] = df.drop(["_","muc", "muc_err"], axis = 1)
+                    #print(data)
                 except:
                     print("ERROR !!!, please check " + file + " \n")
-                
 
     return data
-        
+
+data = data_gathering("Raspa/outputs")
+
+
+    
