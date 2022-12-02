@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 "Use this file to fit isotherms to the DS-Langmuir equation."
 import numpy as np
 import pandas as pd 
@@ -27,6 +28,7 @@ def fit_DS_langmuir(df_iso, p0):
 def autofit_DS_langmuir(df_iso, p0, exp_p0, eps1, eps2):
     "Tries a curvefit until a value close enough to given p0 has been found. Returns found and valid p0."
     "First implementation only checks if all values of p0 are non-negative."
+    "Note per 01/12/22: probably stupid approach."
     nonneg = False
     i = 0
     ret_p0 = np.array([0,0,0,0])
@@ -48,15 +50,46 @@ def autofit_DS_langmuir(df_iso, p0, exp_p0, eps1, eps2):
     print(i)
     return ret_p0
 
-
-
+def try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000):
+    try: 
+        popt, pcov = sp.optimize.curve_fit(DSLangmuir, pressure, molkg, p0=p0, maxfev = maxfev)
+        p0 = popt
+    except Exception as e: 
+        print(e) 
+        p0 = np.array([np.nan, np.nan, np.nan, np.nan])
+    return p0
+def iterative_DS_Langmuir(df_iso, k1_its, q_its, Double_Side=True): 
+    "Generates various p0 starting values, then generates curvefits for all of them"
+    #p0 = [10e-1, 0.6, 10e-1, 0.6]
+    qlinspace = np.linspace(0.6, 0.8, q_its)
+    klogspace = np.logspace(0, -12, k1_its)
+    molkg, pressure = df_iso["molkg"], df_iso["pressure"]
+    p0_array = np.zeros([4, k1_its * k1_its * q_its * q_its])
+    m = 0 #helper variable
+    if Double_Side == True:
+        k2logspace = klogspace
+        q2linspace = qlinspace
+    else:
+        k2logspace = np.zeros([k1_its])
+        q2linspace = np.zeros([q_its])
+    print("Started for-loop.")
+    for i in range(0, k1_its):
+        for j in range(0, q_its): #loop first over k1,q1 
+            for k in range(0, k1_its):
+                for l in range (0, q_its):
+                    p0 = np.array([klogspace[i], qlinspace[j], klogspace[k], q2linspace[j]])
+                    p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+                    m = m + 1
+                    #print("Finished k = %d, l = %d iteration." %(k, l))
+        #print("Finished i = %d, j = %d iteration." %(i, j))
+    return(p0_array)
 def get_name_from_path(path):
     return path[path.rfind('/')+1:path.rfind('out')]
     
 
-
+input_path = "../../../Raspa/outputs/"
 input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
-temp = 300
+temp = 400
 exp_p0 = [1.0e-7, 0.6, 1.0e-1, 0.7]
 eps1, eps2 = 10e2, 0.1
 input1 = "22mC5"
@@ -69,10 +102,12 @@ mol_1_iso = df.read_csv(mol_1_path)
 lang1 =  fit_DS_langmuir(mol_1_iso, p0)
 mol1para = return_molkg_pressure(mol_1_iso)
 
+data = iterative_DS_Langmuir(mol_1_iso, 13, 5, Double_Side=False)
+np.savetxt("22mc6p0.txt", data)
 
 
-plt.semilogx(mol1para[1], DSLangmuir(mol1para[1], lang1[0], lang1[1], lang1[2], lang1[3]), "ro", label=input1 + ", DS-Langmuir fit")
-plt.semilogx(mol1para[1], mol1para[0], "go", label = input1 + ", RASPA-obtained data")
-plt.title("Plot of pure-component data at %d Kelvin" %temp)
-plt.legend()
-plt.show()
+#plt.semilogx(mol1para[1], DSLangmuir(mol1para[1], lang1[0], lang1[1], lang1[2], lang1[3]), "ro", label=input1 + ", DS-Langmuir fit")
+#plt.semilogx(mol1para[1], mol1para[0], "go", label = input1 + ", RASPA-obtained data")
+#plt.title("Plot of pure-component data at %d Kelvin" %temp)
+#plt.legend()
+#plt.show()
