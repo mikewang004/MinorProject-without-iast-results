@@ -25,6 +25,6 @@ def LangmuirParaSelection(data):
     print(data)
 
 
-data = np.loadtxt("text.txt")
+data = np.loadtxt("22mc6p0.txt")
 print(data[:, 80])
 LangmuirParaSelection(data)
