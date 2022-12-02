@@ -79,13 +79,13 @@ def get_name_from_path(path):
     return path[path.rfind('/')+1:path.rfind('out')]
     
 
-
+input_path = "../../../Raspa/outputs/"
 input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
-temp = 300
+temp = 500
 exp_p0 = [1.0e-7, 0.6, 1.0e-1, 0.7]
 eps1, eps2 = 10e2, 0.1
-input1 = "22mC5"
-mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
+input1 = "C7"
+mol_1_path = input_path + "%s/%s-%dout.txt" %(input1, input1, temp)
 #input2 = "3mC6"
 #mol_2_path = input_path_nieuw + "%s/%s-%dout.txt" %(input2, input2, temp)
 
