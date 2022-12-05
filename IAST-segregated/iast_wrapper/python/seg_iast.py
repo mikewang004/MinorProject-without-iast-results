@@ -24,6 +24,7 @@ def fit_DS_langmuir(path, p0):
     return popt
 
 def seg_iast_routine(gas_frac_1, gas_frac_2, mol_1_iso, mol_2_iso):
+    "Note that relative file location is hardcoded"
 #Write params to fortran-file 
     startline, stopline = 'C     Start for Python', 'C     End for Python'
     with open("../fortran/testiast.f", "r+") as file:
@@ -43,7 +44,6 @@ def seg_iast_routine(gas_frac_1, gas_frac_2, mol_1_iso, mol_2_iso):
     del data[startnum:stopnum-1]
     #print(data)
 
-    #for i in range(startnum + 1, startnum + 11 * no_components):
     data.insert(startnum, "      Yi(%d) = %.2fd0      \n" % (2, gas_frac_2))
     data.insert(startnum, "      Yi(%d) = %.2fd0      \n" % (1, gas_frac_1))
     data.insert(startnum, "      Ki(%d, %d) = %.11fd0 \n" % (1, 1, mol_1_iso[0]))
