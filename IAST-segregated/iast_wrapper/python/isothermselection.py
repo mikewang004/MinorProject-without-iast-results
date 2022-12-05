@@ -22,9 +22,22 @@ def LangmuirParaSelection(data):
     "Note structure is [4, m]."
     data = np.delete(data, np.isnan(data).any(axis=0), axis=1)
     data = data[:, data.min(axis=0)>=0.0]
-    print(data)
+    return data
 
+input_path = "../../../Raspa/outputs/"
+input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
+temp = 400
+input1 = "23mC5"
+#mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
+mol_1_path = input_path + "%s/%s-%dout.txt" %(input1, input1, temp)
 
-data = np.loadtxt("22mc6p0.txt")
-print(data[:, 80])
-LangmuirParaSelection(data)
+data = np.loadtxt("p0_output/%s-%dp0.txt" % (input1, temp))
+mol1para = return_molkg_pressure(df.read_csv(mol_1_path))
+
+sel_data = LangmuirParaSelection(data)
+print(sel_data)
+for i in range(0, sel_data.shape[1]):
+    plt.loglog(mol1para[1], DSLangmuir(mol1para[1], sel_data[0,i], sel_data[1,i], sel_data[2,i], sel_data[3,i]), "r.", label=input1 + ", DS-Langmuir fit")
+    plt.loglog(mol1para[1], mol1para[0], "go", label = input1 + ", RASPA-obtained data")
+
+plt.show()

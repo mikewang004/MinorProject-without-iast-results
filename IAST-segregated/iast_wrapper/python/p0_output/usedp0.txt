@@ -1,0 +1,4 @@
+List of used p0 values per IAST-seg simulation. 
+
+Temp.   Molecule 1      Molecule 2      p0_1                                            p0_2
+600     C7              22mC5           [1.662e-5, 6.361e-1, 4.353e-9, 0.8240]          [5.629e-06, 6.958e-02, 5.629e-06, 6.207e-01]
