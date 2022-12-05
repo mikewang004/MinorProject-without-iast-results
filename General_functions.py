@@ -9,7 +9,7 @@ import selfies as sf
 import numpy as np
 import os
 import pandas as pd
-
+import glob
 
 def ML_database():
     
@@ -73,10 +73,32 @@ def data_gathering(path_to_output):
                     #print(data)
                 except:
                     print("ERROR !!!, please check " + file + " \n")
-
     return data
 
-data = data_gathering("Raspa/outputs")
+def remove_pressures_RASPA(columns):
+    path_to_out='MachineLearning/Outputs_RASPA'
+    paths = glob.glob(path_to_out + "/*.txt")
+    for file in paths:
+        data=np.genfromtxt(file,delimiter=',',usecols=columns,skip_header=1)
+        data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
+        temp=int( file.split('/')[-1].split("out")[0][-3:] )
+        data=np.insert(data,obj=1,axis=1,values=temp*np.ones(np.shape(data)[0]))
+        np.savetxt(file, data,header='pressure,temperature,molkg',delimiter=',')
 
-
-    
+def remove_pressures_IAST():
+    path_to_out='MachineLearning/Outputs_IAST'
+    paths = glob.glob(path_to_out + "/*.txt")
+    for file in paths:
+        data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
+        data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
+        length=np.ones(np.shape(data)[0])
+        file_split=file.split('-')
+        
+        temp=int(file_split[1])
+        f1=float(file_split[2][:3])
+        f2=float(file_split[-1][:3])
+        
+        data=np.insert(data,obj=1,axis=1,values=temp*length)
+        data=np.insert(data,obj=2,axis=1,values=f1*length)
+        data=np.insert(data,obj=3,axis=1,values=f2*length)
+        np.savetxt(file, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
