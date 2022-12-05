@@ -27,6 +27,16 @@ def data_gathering(path_to_output):
                     print("ERROR !!!, please check " + file + " \n")
 
     return data
+
+class MachineLearningInput():
+    def __init__(self, *args):
+        for idx, item in enumerate(args):
+            setattr(self, "attr{}".format(idx), item)
+
+a = MachineLearningInput("hoi", 1, 4.7)
+print(a.attr0)
+
+
 os.chdir("..")
 data = data_gathering("IAST-segregated/output")
 
