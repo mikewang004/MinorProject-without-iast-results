@@ -32,7 +32,7 @@ def LangmuirParaSelection(data):
 input_path = "../../../Raspa/outputs/"
 input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
 temp = 400
-input1 = "2mC5"
+input1 = "3mC6"
 #mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
 mol_1_path = input_path + "%s/%s-%dout.txt" %(input1, input1, temp)
 
