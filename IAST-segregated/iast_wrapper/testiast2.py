@@ -14,11 +14,14 @@ input_path = "../../Raspa/outputs/"
 input_path_nieuw = "../../Raspa/nieuwe_outputs/"
 #mol_1_path = input_path + "C7/C7-500out.txt"
 #mol_2_path = input_path + "3mC6/3mC6-500out.txt"
-mol_1_path = input_path_nieuw + "2mC6/2mC6-500out.txt"
-mol_2_path = input_path_nieuw + "3mC6/3mC6-500out.txt"
-molecule_1 = r"$2mC6$"
-molecule_2 = r"$3mC6$"
-temp = r"$500 K$"
+input1 = "2mC5"
+input2 = "23mC5"
+temp = 400
+mol_1_path = input_path + "%s/%s-%dout.txt" %(input1, input1, temp)
+mol_2_path = input_path + "%s/%s-%dout.txt" %(input2, input2, temp)
+molecule_1 = r"$2mC5$"
+molecule_2 = r"$23mC5$"
+temp_latex = r"$400 K$"
 no_components = 2 
 
 def DSLangmuir(ab, k1, qsat1, k2, qsat2):
@@ -85,8 +88,14 @@ def seg_iast_routine(gas_frac_1, gas_frac_2, mol_1_iso, mol_2_iso):
     subprocess.call(['sh', './seg_iast.sh'])
 
     #Move and rename current file 
-
-    os.rename('fortran/fort.25', "../output/22mC5-500_23mC5-500/22mC5-500-%.2f_23mC5-500-%.2f.txt" %(gas_frac_1, gas_frac_2))
+    
+    try: 
+        os.rename('fortran/fort.25', "../output/%s-%d_%s-%d/%s-%d-%.2f_%s-%d-%.2f.txt" %(input1, temp, input2, temp, \
+        input1, temp, gas_frac_1, input2, temp, gas_frac_2))
+    except:
+        os.makedirs("../output/%s-%d_%s-%d" % (input1, temp, input2, temp))
+        os.rename('fortran/fort.25', "../output/%s-%d_%s-%d/%s-%d-%.2f_%s-%d-%.2f.txt" %(input1, temp, input2, temp, \
+        input1, temp, gas_frac_1, input2, temp, gas_frac_2))
     #Return 0 for no error
     return 0;
 
@@ -97,16 +106,16 @@ mol1para = return_molkg_pressure(pd.read_csv(mol_1_path))
 mol2para = return_molkg_pressure(pd.read_csv(mol_2_path)) 
 
 
-mol_1_iso = fit_DS_langmuir(mol_1_path, [1.0e-4, 0.2, 1.0e-4, 0.6]) #22mC5
-mol_2_iso = fit_DS_langmuir(mol_2_path, [1.0e-2, 0.5, 1.0e-4, 0.2]) #23mC5
+mol_1_iso = fit_DS_langmuir(mol_1_path, [1.0e-2, 6.78e-1, 7.895e-10, 1.054]) 
+mol_2_iso = fit_DS_langmuir(mol_2_path, [0.0027, 0.681, 8.749e-10, 1.002]) 
 
 
 
 
-plt.semilogx(mol1para[1], DSLangmuir(mol1para[1], mol_1_iso[0], mol_1_iso[1], mol_1_iso[2], mol_1_iso[3]), "ro", label=molecule_1 + r", homogeneous gas")
-plt.semilogx(mol1para[1], mol1para[0], "go")
-#plt.semilogx(mol2para[1], mol2para[0], "bo")
-#plt.semilogx(mol2para[1], DSLangmuir(mol2para[1], mol_2_iso[0], mol_2_iso[1], mol_2_iso[2], mol_2_iso[3]), "r.", label=molecule_2 + r", homogeneous gas")
+plt.loglog(mol1para[1], DSLangmuir(mol1para[1], mol_1_iso[0], mol_1_iso[1], mol_1_iso[2], mol_1_iso[3]), "ro", label=molecule_1 + r", homogeneous gas")
+plt.loglog(mol1para[1], mol1para[0], "go")
+plt.loglog(mol2para[1], mol2para[0], "bo")
+plt.loglog(mol2para[1], DSLangmuir(mol2para[1], mol_2_iso[0], mol_2_iso[1], mol_2_iso[2], mol_2_iso[3]), "r.", label=molecule_2 + r", homogeneous gas")
 #plt.title("Loadings of a " + molecule_1 + " and " + molecule_2 +  " mixture at temperature " + temp)
 #plt.xlabel("Pressure (Pascal)")
 #plt.ylabel("Loading (mol/kg)")
@@ -115,5 +124,5 @@ plt.show()
 
 maxnofrac = 50
 gasfrac = np.array([np.linspace(0, 1, maxnofrac), np.linspace(1, 0, maxnofrac)])
-#for i in range(0, maxnofrac):
-    #seg_iast_routine(gasfrac[0][i], gasfrac[1][i], mol_1_iso, mol_2_iso)
+for i in range(0, maxnofrac):
+    seg_iast_routine(gasfrac[0][i], gasfrac[1][i], mol_1_iso, mol_2_iso)

@@ -50,7 +50,7 @@ def autofit_DS_langmuir(df_iso, p0, exp_p0, eps1, eps2):
     print(i)
     return ret_p0
 
-def try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000):
+def try_curvefit(DSLangmuir, pressure, molkg, p0, maxfev = 2000):
     try: 
         popt, pcov = sp.optimize.curve_fit(DSLangmuir, pressure, molkg, p0=p0, maxfev = maxfev)
         p0 = popt
@@ -69,20 +69,29 @@ def iterative_DS_Langmuir(df_iso, k1_its, q_its, Double_Side=True):
     if Double_Side == True:
         k2logspace = klogspace
         q2linspace = qlinspace
+        print("true")
     else:
         k2logspace = np.zeros([k1_its])
         q2linspace = np.zeros([q_its])
+        print("false")
     print("Started for-loop.")
     for i in range(0, k1_its):
         for j in range(0, q_its): #loop first over k1,q1 
-            for k in range(0, k1_its):
-                for l in range (0, q_its):
-                    p0 = np.array([klogspace[i], qlinspace[j], klogspace[k], q2linspace[j]])
-                    p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
-                    m = m + 1
+            if Double_Side == True:
+                #print("double_side still true")
+                for k in range(0, k1_its):
+                    for l in range (0, q_its):
+                        p0 = np.array([klogspace[i], qlinspace[j], k2logspace[k], q2linspace[l]])
+                        p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+                        m = m + 1
                     #print("Finished k = %d, l = %d iteration." %(k, l))
+            else:
+                p0 = np.array([klogspace[i], qlinspace[j], k2logspace[i], q2linspace[j]])
+                p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+                m = m + 1
         #print("Finished i = %d, j = %d iteration." %(i, j))
     return(p0_array)
+
 def get_name_from_path(path):
     return path[path.rfind('/')+1:path.rfind('out')]
     
@@ -92,8 +101,8 @@ input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
 temp = 400
 exp_p0 = [1.0e-7, 0.6, 1.0e-1, 0.7]
 eps1, eps2 = 10e2, 0.1
-input1 = "22mC5"
-mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
+input1 = "2mC5"
+mol_1_path = input_path + "%s/%s-%dout.txt" %(input1, input1, temp)
 #input2 = "3mC6"
 #mol_2_path = input_path_nieuw + "%s/%s-%dout.txt" %(input2, input2, temp)
 
@@ -102,8 +111,8 @@ mol_1_iso = df.read_csv(mol_1_path)
 lang1 =  fit_DS_langmuir(mol_1_iso, p0)
 mol1para = return_molkg_pressure(mol_1_iso)
 
-data = iterative_DS_Langmuir(mol_1_iso, 13, 5, Double_Side=False)
-np.savetxt("22mc6p0.txt", data)
+data = iterative_DS_Langmuir(mol_1_iso, 6, 4, Double_Side=True)
+np.savetxt("p0_output/%s-%dp0.txt" % (input1, temp), data)
 
 
 #plt.semilogx(mol1para[1], DSLangmuir(mol1para[1], lang1[0], lang1[1], lang1[2], lang1[3]), "ro", label=input1 + ", DS-Langmuir fit")
