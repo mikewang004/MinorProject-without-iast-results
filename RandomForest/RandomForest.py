@@ -28,10 +28,14 @@ def data_gathering(path_to_output):
 
     return data
 
-class MachineLearningInput():
+class MachineLearningInput(): 
+    """INPUT: keep this order: name molecule, fraction, name molecule, fraction, ..."""
     def __init__(self, *args):
         for idx, item in enumerate(args):
             setattr(self, "attr{}".format(idx), item)
+    
+    
+
 
 a = MachineLearningInput("hoi", 1, 4.7)
 print(a.attr0)
