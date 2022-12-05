@@ -27,6 +27,20 @@ def data_gathering(path_to_output):
                     print("ERROR !!!, please check " + file + " \n")
 
     return data
+
+class MachineLearningInput(): 
+    """INPUT: keep this order: name molecule, fraction, name molecule, fraction, ..."""
+    def __init__(self, *args):
+        for idx, item in enumerate(args):
+            setattr(self, "attr{}".format(idx), item)
+    
+    
+
+
+a = MachineLearningInput( )
+# print(a.attr0)
+
+
 os.chdir("..")
 data = data_gathering("IAST-segregated/output")
 
