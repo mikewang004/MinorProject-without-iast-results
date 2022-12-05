@@ -37,8 +37,8 @@ class MachineLearningInput():
     
 
 
-a = MachineLearningInput("hoi", 1, 4.7)
-print(a.attr0)
+a = MachineLearningInput( )
+# print(a.attr0)
 
 
 os.chdir("..")

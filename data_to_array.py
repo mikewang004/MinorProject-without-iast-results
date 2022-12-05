@@ -5,18 +5,52 @@ import matplotlib.pyplot as plt
 import os
 from General_functions import ML_database
 import glob
+import sys
 
 
 class MachineLearningInput(): 
     """INPUT: keep this order: [name molecules] , [fraction molecules], Temperature, Pressure"""
     def __init__(self, *args):
-        print(args[0][0])
-        # for idx, item in enumerate(args):
-        #         setattr(self, "attr{}".format(idx), item)
+        supported_molecules = ["C7","2mC6","3mC6","22mC5","23mC5","24mC5","33mC5",  "3eC5", "223mC4"] 
+        
+        for item in args[0]:
+            if str(item) not in supported_molecules:
+                sys.exit('Input a supported molecule: "C7","2mC6","3mC6","22mC5","23mC5","24mC5","33mC5",  "3eC5", "223mC4"')
+        
+        try:
+            self.molecules = args[0]
+        except:
+            sys.exit("Give input like this: MachineLearningInput([name molecules] , [fraction molecules], Temperature, Pressure)")
+            
+        try:
+            if len(args[1]) != len(args[0]):
+                sys.exit("Not for all molecules are fractions given, exit program.")
+            else:
+                self.fractions = args[1]
+        except: 
+            "Give input like this: [name molecules] , [fraction molecules], Temperature, Pressure"
+            
+        try:
+            self.temprature = args[2]
+        except:
+            print("No temperature given, default initialization: T = 300K")
+            self.temprature = 300
+            
+        try:
+            self.pressure = args[3]
+        except:
+            print("No pressure given, default initialization: p = 1e4 Pa")
+            self.pressure = 1e4
+            
+        
+        # print(args[0])
+        # for idx, item in enumerate(args[2]):
+        #     for idx, item in enumerate(args[0]):
+        #         setattr(self, molecules, item)
         #     else:
                 
     
-obj = MachineLearningInput(["a", "b"], [0.4,0.6], 300, 1e6)
+obj = MachineLearningInput(["C7", "23mC5"])
 
 #Convert txt files to np arrays
 # directory="2mC6"
