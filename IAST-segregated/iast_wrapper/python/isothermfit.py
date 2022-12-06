@@ -74,21 +74,21 @@ def iterative_DS_Langmuir(df_iso, k1_its, q_its, Double_Side=True):
         k2logspace = np.zeros([k1_its])
         q2linspace = np.zeros([q_its])
         print("false")
+    qlinspace = np.ones([q_its]) * 0.7
     print("Started for-loop.")
-    for i in range(0, k1_its):
-        for j in range(0, q_its): #loop first over k1,q1 
-            if Double_Side == True:
-                #print("double_side still true")
-                for k in range(0, k1_its):
-                    for l in range (0, q_its):
-                        p0 = np.array([klogspace[i], qlinspace[j], k2logspace[k], q2linspace[l]])
-                        p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
-                        m = m + 1
+    for i in range(0, k1_its):#loop first over k1,q1 
+        if Double_Side == True:
+            #print("double_side still true")
+            for k in range(0, k1_its):
+                for l in range (0, q_its):
+                    p0 = np.array([klogspace[i], 0.7, k2logspace[k], q2linspace[l]])
+                    p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+                    m = m + 1
                     #print("Finished k = %d, l = %d iteration." %(k, l))
-            else:
-                p0 = np.array([klogspace[i], qlinspace[j], k2logspace[i], q2linspace[j]])
-                p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
-                m = m + 1
+        else:
+            p0 = np.array([klogspace[i], qlinspace[j], k2logspace[i], q2linspace[j]])
+            p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+            m = m + 1
         #print("Finished i = %d, j = %d iteration." %(i, j))
     return(p0_array)
 

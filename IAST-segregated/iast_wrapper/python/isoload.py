@@ -11,10 +11,14 @@ import subprocess
 
 def load_raspa(temp, path = "../../../Raspa"):
     mol_names = []
+    mol_csvs = []
     for root, dir, files in os.walk(path):
         for names in files:
             if str(temp) in names:
-                mol_names.append(names.partition("-")[0]) 
-    print(mol_names)
+                mol_names.append(names.partition("-")[0])
+                #print(names)
+                mol_csvs.append(root + "/" + names)
+    print(mol_csvs)                
+    return mol_names
 
-load_raspa(600)
+load_raspa(300)
