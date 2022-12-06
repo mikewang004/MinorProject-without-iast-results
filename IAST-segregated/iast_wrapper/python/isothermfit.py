@@ -61,7 +61,7 @@ def try_curvefit(DSLangmuir, pressure, molkg, p0, maxfev = 2000):
 def iterative_DS_Langmuir(df_iso, k1_its, q_its, Double_Side=True): 
     "Generates various p0 starting values, then generates curvefits for all of them"
     #p0 = [10e-1, 0.6, 10e-1, 0.6]
-    qlinspace = np.linspace(0.6, 0.8, q_its)
+    qlinspace = np.linspace(0.5, 4, q_its)
     klogspace = np.logspace(0, -12, k1_its)
     molkg, pressure = df_iso["molkg"], df_iso["pressure"]
     p0_array = np.zeros([4, k1_its * k1_its * q_its * q_its])
@@ -111,7 +111,7 @@ mol_1_iso = df.read_csv(mol_1_path)
 lang1 =  fit_DS_langmuir(mol_1_iso, p0)
 mol1para = return_molkg_pressure(mol_1_iso)
 
-data = iterative_DS_Langmuir(mol_1_iso, 6, 4, Double_Side=True)
+data = iterative_DS_Langmuir(mol_1_iso, 6, 6, Double_Side=True)
 np.savetxt("p0_output/%s-%dp0.txt" % (input1, temp), data)
 
 

@@ -9,7 +9,7 @@ import scipy as sp
 import os 
 import subprocess
 
-def load_raspa(temp, path = "../../../Raspa"):
+def load_raspa(temp, path = "../../../Raspa/nieuwe_inputs"):
     mol_names = []
     mol_csvs = []
     for root, dir, files in os.walk(path):
@@ -18,7 +18,7 @@ def load_raspa(temp, path = "../../../Raspa"):
                 mol_names.append(names.partition("-")[0])
                 #print(names)
                 mol_csvs.append(root + "/" + names)
-    print(mol_csvs)                
+    print(mol_names)                
     return mol_names
 
-load_raspa(300)
+load_raspa(400)
