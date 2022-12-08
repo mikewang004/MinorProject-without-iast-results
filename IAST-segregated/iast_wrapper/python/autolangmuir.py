@@ -5,7 +5,7 @@
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
-import pyiast 
+import pyiast
 import scipy as sp
 import os 
 import subprocess
@@ -13,7 +13,7 @@ import pandas as df
 
 
 plotpath = "../../langmuir_pure_plots/"
-temp = 400
+temp = 300
 def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
     mol_names = []
     mol_csvs = []
@@ -43,7 +43,7 @@ def try_curvefit(DSLangmuir, pressure, molkg, p0, maxfev = 2000):
         p0 = np.array([np.nan, np.nan, np.nan, np.nan])
     return p0
 
-def iterative_DS_Langmuir(df_iso, k1_its=6, q_its=5, q1_value=0.7): 
+def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7): 
     "Generates various p0 starting values, then generates curvefits for all of them"
     qlinspace = np.linspace(0.5, 4, q_its)
     klogspace = np.logspace(0, -12, k1_its)
@@ -59,11 +59,11 @@ def iterative_DS_Langmuir(df_iso, k1_its=6, q_its=5, q1_value=0.7):
                 m = m + 1
     return(p0_array)
 
-def autoselect_p0_DS_Langmuir(data):
+def autoselect_p0_DS_Langmuir(data, name):
     "Selects data based upon two criteria: 1. no values should be smaller than 0;"
     "2. q1 should be between 0.6 and 0.8."
     "Returns the average p0 value."
-    data = data[:, data.min(axis=0)>=10e-21] 
+    data = data[:, data.min(axis=0)>=10e-20] 
     data = data[:, data[1, :] > data[3, :]]
     data = np.delete(data, np.isnan(data).any(axis=0), axis=1)
     return np.average(data, axis=1)
@@ -80,10 +80,12 @@ def save_p0_plot(mol1iso, sel_data, input1):
     plt.savefig(plotpath + "%s-%d_plot" %(input1, temp))
     plt.close()
 
-def auto_fit_plot_Langmuir(temp):
-    paths, mol_names = load_raspa(temp)
-    #print(paths)
-    print(mol_names)
+def auto_fit_plot_Langmuir(temp, input_name = None, input_path = None):
+    if input_name == None:
+        if input_path == None:
+            paths, mol_names = load_raspa(temp)
+    else:
+        paths, mol_names = [input_path], [input_name]
     output = []
     for i in range(0, len(mol_names)):
     #for i in range(0, 2):
@@ -92,8 +94,17 @@ def auto_fit_plot_Langmuir(temp):
         sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso))
         output.append(sel_data)
         save_p0_plot(mol_1_iso, sel_data, name)
-        print("Finised molecule %s." %name)
-    np.savetxt('p0_values.txt', output)
+        #print("Finised molecule %s." %name)
+    output1 = np.zeros(4)
+    with open('p0_values-%d.txt' %temp, "w") as f:
+        for i in range(0, len(output)):
+            output1 = np.array( output[i])
+            f.write("%s \t %s \n" %(mol_names[i], output1))
     return 0;
+name = "22mC5"
+paths = "../../../Raspa/nieuwe_outputs/%s/%s-%dout.txt" %(name, name, temp)
+def main():
+    auto_fit_plot_Langmuir(temp)
 
-auto_fit_plot_Langmuir(temp)
+if __name__ == "__main__":
+    main()  
