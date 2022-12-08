@@ -54,7 +54,7 @@ C     End for Python1
 C     Start for Python2
       write(25,'(A)')   '     Pressure (Pa)     22mC5 -400 (mol/kg)     2mC6 -400 (mol/kg)     C7 -400 (mol/kg)'
       write(6,'(2e20.10)') Ni(1),Ni(2),Ni(3)
-      write(6,*) 'Ni(1)   ','Ni(2)   ','Ni(3)'   
+      write(6,*) 'Ni(1)   ','Ni(2)   ',Ni(3)   
 
 C     End for Python2   
 C      stop
