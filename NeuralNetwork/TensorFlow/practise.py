@@ -50,19 +50,36 @@ history = model.fit(
 
 
 model.save('saved_model/')
+| Label | Description |
+|-------|-------------|
+| 0     | T-shirt/top |
+| 1     | Trouser     |
+| 2     | Pullover    |
+| 3     | Dress       |
+| 4     | Coat        |
+| 5     | Sandal      |
+| 6     | Shirt       |
+| 7     | Sneaker     |
+| 8     | Bag         |
+| 9     | Ankle boot  |
 
 '''
 model = keras.models.load_model('saved_model/')
 predictions = model.predict(val_dataset)
 
+def load_images_from_folder(folder):
+    images = []
+    for filename in os.listdir(folder):
+        img = cv.imread(os.path.join(folder,filename))
+        gray_img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+        gr_img = cv.resize(gray_img,(28,28))
+        if img is not None:
+            images.append(gr_img)
+    return images
 
-img = cv.imread('Images/yeezy.jpg')
-gray_img = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-gr_img = cv.resize(gray_img,(28,28))
+input_lst = load_images_from_folder("Images")
 #cv.imwrite("Images/test_gray_resized.jpg",gr_img)
 
 
-own_x = [gr_img]
-
-own_data = create_datasets([gr_img], [0])
+own_data = create_datasets(input_lst, [0,4,0,7])
 own_pred = model.predict(own_data)

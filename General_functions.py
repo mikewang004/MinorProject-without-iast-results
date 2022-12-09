@@ -73,7 +73,7 @@ def data_gathering(path_to_output):
                     print("ERROR !!!, please check " + file + " \n")
     return data
 
-def RASPA_database(columns):
+def RASPA_database(columns,chemstructure=ML_database()):
     path_to_out='MachineLearning/Outputs_RASPA'
     paths = glob.glob(path_to_out + "/*.txt")
     database=np.array(len(paths))
