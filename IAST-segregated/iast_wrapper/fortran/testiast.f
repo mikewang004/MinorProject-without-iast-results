@@ -62,7 +62,7 @@ C      stop
 
       Do J = 0, 8
          If(J.Lt.8) Then
-            Do I = 1, 100, 2
+            Do I = 1, 50, 2
                P = Dble(I*10**J)
                Call Seg_Iast(Ni,Xi1,Molfrac,Yi,P,Nterm_max,Carrier_gas)
 C     Start for Python3

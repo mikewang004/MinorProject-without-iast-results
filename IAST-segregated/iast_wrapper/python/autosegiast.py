@@ -101,7 +101,6 @@ def prepare_write_strings_testiast_dotf(no_compos, str1):
 
 def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
     "Note this is only for single iteration."
-    print(gas_frac)
     no_compos = len(mix_combi)
     p0_array = lookup_mix_dict(mix_combi, p0_dict)
     startline, stopline = 'C     Start for Python1', 'C     End for Python1'
