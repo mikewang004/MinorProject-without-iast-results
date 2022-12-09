@@ -5,14 +5,12 @@
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
-import pyiast
 import scipy as sp
 import os 
 import subprocess
 import pandas as df
 from itertools import permutations, combinations
 
-temp = 400
 def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
     mol_names = []
     mol_csvs = []
@@ -191,6 +189,7 @@ def automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac):
     no_mol_iter = np.shape(mix_combi)
     for i in range(0, no_mol_iter[0]):
         seg_iast_one_combi_loop(temp, p0_lookup, mix_combi[i], gas_frac)
+        #print(mix_combi[i])
     return 0;
 
 def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
@@ -199,6 +198,7 @@ def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
     return 0;
 
 def main():
+    temp = 400
     no_molecules = 4
     no_gas_fractions = 20
     subproc_no_print()
@@ -211,6 +211,6 @@ def main():
     #move_segiast_dotf_output(output_path, gas_frac[12])
     automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 
-    
+
 if __name__ == "__main__":
     main()  
