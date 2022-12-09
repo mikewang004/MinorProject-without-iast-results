@@ -102,3 +102,16 @@ def remove_pressures_IAST():
         data=np.insert(data,obj=2,axis=1,values=f1*length)
         data=np.insert(data,obj=3,axis=1,values=f2*length)
         np.savetxt(file, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
+        
+path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
+
+chemstructure=ML_database()
+data_RASPA=[]
+for file in path_RASPA:
+    
+    molecule = file.split('/')[-1].split('-')[0]
+
+    data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+    selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
+    data=np.hstack((selfie,data))
+    data_RASPA.append(data)
