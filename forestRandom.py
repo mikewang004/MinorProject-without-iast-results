@@ -188,18 +188,25 @@ plt.xlabel("Index of array rel_err")
 plt.ylabel("Relative error of predicted point wrt to known point")
 plt.show()
 
-plt.figure()
-plt.title("Performance Decision Tree, logaritmic plot")
-plt.scatter(range(len(rel_err)), rel_err)
-plt.yscale("log")
-plt.xlabel("Index of array rel_err")
-plt.ylabel("Relative error of predicted point wrt to known point")
-plt.show()
-
 rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
 rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
 mean_rel_err = np.mean(rel_err)
 print(mean_rel_err)
+
+plt.figure()
+plt.title("Performance Decision Tree, logaritmic plot")
+plt.scatter(range(len(rel_err)), rel_err, label="Relative error point i")
+plt.hlines(mean_rel_err, xmin = 0, xmax = len(rel_err), color="red", label="Mean relative error")
+plt.yscale("log")
+plt.xlabel("Index of array rel_err")
+plt.ylabel("Relative error of predicted point wrt to known point")
+plt.legend()
+plt.show()
+
+# rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
+# rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
+# mean_rel_err = np.mean(rel_err)
+# print(mean_rel_err)
 
 
 
