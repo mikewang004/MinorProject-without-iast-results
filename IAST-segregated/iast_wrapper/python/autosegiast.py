@@ -76,14 +76,15 @@ def loop_over_list(data, start, end=None):
                 stopnum = num
         return startnum, stopnum
 def prepare_strings_testiast_dotf(no_compos, mix_combi, temp):
+    mix_combi = [x.strip(" ") for x in mix_combi]
     str1 = "      write(6,*) "
     str2 = "      write(6,'(2e20.10)') "
-    str3 = "      write(25,'(A)')   '     Pressure (Pa)"
+    str3 = """      write(25,'(A)')   "     Pressure (Pa)"""
     for i in range(0, no_compos):
         if i == (no_compos -1):
             str1 += str("'Ni(%d)   '" %(i+1))
             str2 += str("Ni(%d)" %(i+1))
-            str3 += str("     %s-%d (mol/kg)'" %(mix_combi[i], temp))
+            str3 += str("""     %s-%d (mol/kg)" """ %(mix_combi[i], temp))
         else:
             str1 += str("'Ni(%d)   '," %(i+1))
             str2 += str("Ni(%d)," %(i+1))
@@ -107,9 +108,9 @@ def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
     start2, stop2 = 'C     Start for Python2', 'C     End for Python2'
     start3, start4 = 'C     Start for Python3', 'C     Start for Python4'
     output_strings = prepare_strings_testiast_dotf(no_compos, mix_combi, temp)
-    with open("debug/testiast.f", "r+") as file:
+    with open("../fortran/testiast.f", "r+") as file:
         data = file.readlines()
-    os.remove("debug/testiast.f")
+    os.remove("../fortran/testiast.f")
     startnum, stopnum = loop_over_list(data, startline, stopline)
     del data[startnum:stopnum-1]
     startnum2, stopnum2 = loop_over_list(data, start2, stop2)
@@ -132,28 +133,72 @@ def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
     data.insert(startnum2, output_strings[2] + "\n")
     startnum3 = loop_over_list(data, start3)
     del data[startnum3]
-    data.insert(startnum3, prepare_write_strings_testiast_dotf(no_compos,"                Write(25,'(5e20.10)')) P,")+ "\n")
+    data.insert(startnum3, prepare_write_strings_testiast_dotf(no_compos,"                Write(25,'(5e20.10)') P,")+ "\n")
     startnum4 = loop_over_list(data, start4)
     del data[startnum4]
     data.insert(startnum4, prepare_write_strings_testiast_dotf(no_compos,"            Write(25,'(5e20.10)') P,")+ "\n")
 
-    with open("debug/testiast.f", "a") as file:
+    with open("../fortran/testiast.f", "a") as file:
         for num, line in enumerate(data, 1):
             file.write(line)
     return 0;
 
-def run_testiast_dotf(temp, i):
+def run_testiast_dotf():
     subprocess.call(['sh', './seg_iast.sh'])
-    os.rename('../fortran/fort.25', "debugoutput-%d-%i.txt" %(temp, i))
     return 0;
-    #Return 0 for no error
+    
+def try_folder_path(temp, mix_combi, path = "../../automated_output"):
+    no_compos = len(mix_combi)
+    mix_combi = [x.strip(" ") for x in mix_combi]
+    str1 = ""
+    for i in range(0, no_compos):
+        if i == no_compos-1:
+            str1 += str("%s" %(mix_combi[i]))
+        else:
+            str1 += str("%s-" %(mix_combi[i]))
+    if os.path.exists(path + "/%d_molecules/%dK_temperature" % (no_compos, temp)) == True:
+        pass
+    else:
+        os.makedirs(path + "/%d_molecules/%dK_temperature" % (no_compos, temp))
+    if os.path.exists(path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1)) == True:
+        pass
+    else:
+        os.makedirs(path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1))
+    return path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1)
+
+def move_segiast_dotf_output(output_path, gas_frac):
+    str1 = ""
+    no_compos = gas_frac.shape[0]
+    for i in range(0, no_compos):
+        if i == no_compos-1:
+            str1 += str("%f" %(gas_frac[i]))
+        else:
+            str1 += str("%f-" %(gas_frac[i]))
+    os.rename('../fortran/fort.25', "%s/%s.txt" %(output_path, str1))
+
+def seg_iast_one_combi_loop(temp, p0_lookup, mix_combi, gas_frac):
+    no_gas_iter = gas_frac.shape[0]
+    for i in range(0, no_gas_iter):
+        write_testiast_dotf(temp, mix_combi, p0_lookup, gas_frac[i])
+        run_testiast_dotf()
+        output_path = try_folder_path(temp, mix_combi)
+        move_segiast_dotf_output(output_path, gas_frac[i])
+
+def automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac):
+    no_mol_iter = np.shape(mix_combi)
+    for i in range(0, no_mol_iter[0]):
+        seg_iast_one_combi_loop(temp, p0_lookup, mix_combi[i], gas_frac)
+
 def main():
-    p0_lookup, names = p0_dict(400)
-    print(names)
-    mix_combi = get_mix_combinations(4, names)
-    gas_frac = get_frac_permutations(4, 10)
-    write_testiast_dotf(temp, mix_combi[11], p0_lookup, gas_frac[12])
-
-
+    no_molecules = 3
+    no_gas_fractions = 10
+    p0_lookup, names = p0_dict(temp)
+    mix_combi = get_mix_combinations(no_molecules, names)
+    gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
+    #write_testiast_dotf(temp, mix_combi[11], p0_lookup, gas_frac[12])
+    #run_testiast_dotf()
+    #output_path = try_folder_path(temp, mix_combi[12])
+    #move_segiast_dotf_output(output_path, gas_frac[12])
+    automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 if __name__ == "__main__":
     main()  
