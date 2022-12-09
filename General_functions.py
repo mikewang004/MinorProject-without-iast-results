@@ -12,13 +12,11 @@ import pandas as pd
 import glob
 
 def ML_database():
-    
-    
+
     "Creating the smiles and name arrays"
     molecule_names = ['C7',"2mC6",'3mC6','22mC5',"23mC5",'24mC5',"33mC5",  "3eC5",   "223mC4"]
     smiles_dataset = ["CCCCCCC", "CCCCC(C)C" ,"CCCC(C)CC" , "CCCC(C)(C)C" ,"CCC(C)C(C)C" , "CC(C)CC(C)C" ,"CCC(C)(C)CC","CCC(CC)CC" ,"CC(C)C(C)(C)C"]
     selfies_dataset = list(map(sf.encoder, smiles_dataset)) #transforming to selfies
-    
     
     max_len = max(sf.len_selfies(s) for s in selfies_dataset)
     symbols = sf.get_alphabet_from_selfies(selfies_dataset) # creating symbols for each character that is in the database
@@ -75,22 +73,36 @@ def data_gathering(path_to_output):
                     print("ERROR !!!, please check " + file + " \n")
     return data
 
-def remove_pressures_RASPA(columns):
+def RASPA_database(columns):
     path_to_out='MachineLearning/Outputs_RASPA'
     paths = glob.glob(path_to_out + "/*.txt")
-    for file in paths:
+    database=np.array(len(paths))
+    for i,file in enumerate(paths):
+        molecule = file.split('/')[-1].split('-')[0]
+        selfie=chemstructure[molecule]
         data=np.genfromtxt(file,delimiter=',',usecols=columns,skip_header=1)
+        
+        #Removing pressures that are too high
         data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
+        
+        #adding temperature
         temp=int( file.split('/')[-1].split("out")[0][-3:] )
         data=np.insert(data,obj=1,axis=1,values=temp*np.ones(np.shape(data)[0]))
-        np.savetxt(file, data,header='pressure,temperature,molkg',delimiter=',')
+        
+        #adding selfie
+        data=np.insert(data,obj=0,axis=0,values=selfie)
+        database[i]=data
+    return database
 
-def remove_pressures_IAST():
+def IAST_database():
     path_to_out='MachineLearning/Outputs_IAST'
     paths = glob.glob(path_to_out + "/*.txt")
+    
     for file in paths:
+        #Removing pressures that are too high
         data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
         data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
+        
         length=np.ones(np.shape(data)[0])
         file_split=file.split('-')
         
@@ -102,16 +114,44 @@ def remove_pressures_IAST():
         data=np.insert(data,obj=2,axis=1,values=f1*length)
         data=np.insert(data,obj=3,axis=1,values=f2*length)
         np.savetxt(file, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
-        
-path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
 
-chemstructure=ML_database()
-data_RASPA=[]
-for file in path_RASPA:
+def make_training_database(chemstructure=ML_database()):
+    path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
+    path_IAST=glob.glob('MachineLearning/Outputs_IAST/*.txt')
     
-    molecule = file.split('/')[-1].split('-')[0]
+    data_RASPA=[]
+    data_IAST=[]
+    for file in path_RASPA:
+        molecule = file.split('/')[-1].split('-')[0]
 
-    data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
-    selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
-    data=np.hstack((selfie,data))
-    data_RASPA.append(data)
+        data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+        selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
+        data=np.hstack((selfie,data))
+        data_RASPA.append(data)
+        
+    for file in path_IAST:
+        m1=file.split('/')[-1].split('-')[0]
+        m2=file.split('/')[-1].split('-')[2][5:]
+        
+        f1=float( file.split('/')[-1].split('-')[2][:4] )
+        f2=1-f1
+        data=np.loadtxt(file,delimiter=',',skiprows=1,usecols=(0,1,-2,-1))
+        try:
+            selfie1=np.repeat(chemstructure[m1], data.shape[0]).reshape(52,data.shape[0]).T
+            selfie2=np.repeat(chemstructure[m2], data.shape[0]).reshape(52,data.shape[0]).T
+        except KeyError:
+            selfie1=np.repeat(chemstructure['22mC5'], data.shape[0]).reshape(52,data.shape[0]).T
+            selfie2=np.repeat(chemstructure[m2], data.shape[0]).reshape(52,data.shape[0]).T
+            
+        selfie=f1*selfie1+f2*selfie2
+        data=np.hstack((selfie,data))
+        data_IAST.append(data)
+    return data_RASPA,data_IAST
+
+
+
+        
+
+
+
+    
