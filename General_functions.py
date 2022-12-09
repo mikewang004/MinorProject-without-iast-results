@@ -146,12 +146,4 @@ def make_training_database(chemstructure=ML_database()):
         selfie=f1*selfie1+f2*selfie2
         data=np.hstack((selfie,data))
         data_IAST.append(data)
-    return data_RASPA,data_IAST
-
-
-
-        
-
-
-
-    
+    return np.vstack(data_RASPA),np.vstack(data_IAST)
