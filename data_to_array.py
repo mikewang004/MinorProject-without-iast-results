@@ -50,7 +50,7 @@ class MachineLearningInput():
         for idx in range(len(self.molecules)):
             print(str(self.molecules[idx]) + ", " + str(self.fractions[idx]))
     
-    def Selfies(self):      
+    def SelfiesDatabase(self):      
         """Returns a directory of all possible selfies codes"""
         
         "Creating the smiles and name arrays"
@@ -78,14 +78,21 @@ class MachineLearningInput():
     
         return molecular_database
     
-    # def 
+    def Add_Selfies(self):
+        """Adds the Selfies of the used molecules considering fractions"""
+        selfies_dict = self.SelfiesDatabase()
+        temp = 0
+        for idx, item in enumerate(self.molecules):
+            temp+= self.fractions[idx]*selfies_dict[item]
+        self.selfies = temp
+        
     
     
                 
     
 obj = MachineLearningInput(["C7", "23mC5"], [0.7,0.3])
 obj.Print()
-# obj.Selfies()
+obj.Add_Selfies()
 #Convert txt files to np arrays
 # directory="2mC6"
 # file=directory + "-400out.txt"
