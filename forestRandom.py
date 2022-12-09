@@ -171,8 +171,6 @@ regr.fit(x_train, y_train)
 
 y_pred=regr.predict(x_test) 
 
-# std = np.std([y_test, y_pred], axis = 0)
-
 rel_err=np.abs(y_pred-y_test)/y_test
 
 plt.figure()
@@ -190,9 +188,18 @@ plt.xlabel("Index of array rel_err")
 plt.ylabel("Relative error of predicted point wrt to known point")
 plt.show()
 
-# plt.figure()
-# plt.scatter(range(len(std)), std)
-# plt.show()
+plt.figure()
+plt.title("Performance Decision Tree, logaritmic plot")
+plt.scatter(range(len(rel_err)), rel_err)
+plt.yscale("log")
+plt.xlabel("Index of array rel_err")
+plt.ylabel("Relative error of predicted point wrt to known point")
+plt.show()
+
+rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
+rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
+mean_rel_err = np.mean(rel_err)
+print(mean_rel_err)
 
 
 
