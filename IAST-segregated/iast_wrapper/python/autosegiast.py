@@ -50,6 +50,8 @@ def get_frac_permutations(n_mols, n_frac = 10):
     "Returns all possible combinations of n molecules"
     gas_array = np.linspace(0, 1, n_frac+1)
     gas_fracs = np.array(list(permutations(gas_array, n_mols)))
+    if n_mols != 2:
+        gas_fracs = gas_fracs[~np.any(gas_fracs == 0.0, axis=1)] #Note that an [n] mixture with one fraction = 0 is an [n] -1 mixture
     return gas_fracs[np.isclose(np.sum(gas_fracs, axis=1), 1.0), :]
 
 def lookup_mix_dict(mix_combi, p0_dict):
@@ -59,13 +61,27 @@ def lookup_mix_dict(mix_combi, p0_dict):
         p0_result.append(p0_dict[s])
     return p0_result
 
+def loop_over_list(data, start, end=None):
+    "start, end both strings; data a list"
+    if end == None:
+        for num, line in enumerate(data, 1):
+            if start in line:
+                startnum = num
+        return startnum
+    else:
+        for num, line in enumerate(data, 1):
+            if start in line:
+                startnum = num
+            elif end in line:
+                stopnum = num
+        return startnum, stopnum
 def prepare_strings_testiast_dotf(no_compos, mix_combi, temp):
     str1 = "      write(6,*) "
     str2 = "      write(6,'(2e20.10)') "
     str3 = "      write(25,'(A)')   '     Pressure (Pa)"
     for i in range(0, no_compos):
         if i == (no_compos -1):
-            str1 += str('Ni(%d)   ' %(i+1))
+            str1 += str("'Ni(%d)   '" %(i+1))
             str2 += str("Ni(%d)" %(i+1))
             str3 += str("     %s-%d (mol/kg)'" %(mix_combi[i], temp))
         else:
@@ -74,27 +90,29 @@ def prepare_strings_testiast_dotf(no_compos, mix_combi, temp):
             str3 += str("     %s-%d (mol/kg)" %(mix_combi[i], temp))
     return str1, str2, str3
 
+def prepare_write_strings_testiast_dotf(no_compos, str1):
+    for i in range(0, no_compos):
+        if i == (no_compos-1):
+            str1 += str('Ni(%d)' %(i+1))
+        else:
+            str1 += str('Ni(%d),' %(i+1))
+    return str1
+
 def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
     "Note this is only for single iteration."
+    print(gas_frac)
     no_compos = len(mix_combi)
     p0_array = lookup_mix_dict(mix_combi, p0_dict)
     startline, stopline = 'C     Start for Python1', 'C     End for Python1'
     start2, stop2 = 'C     Start for Python2', 'C     End for Python2'
+    start3, start4 = 'C     Start for Python3', 'C     Start for Python4'
     output_strings = prepare_strings_testiast_dotf(no_compos, mix_combi, temp)
     with open("debug/testiast.f", "r+") as file:
         data = file.readlines()
     os.remove("debug/testiast.f")
-    for num, line in enumerate(data, 1):
-        if startline in line:
-            startnum = num
-        elif stopline in line:
-            stopnum = num
-        elif start2 in line:
-            startnum2 = num
-        elif stop2 in line:
-            stopnum2 = num
+    startnum, stopnum = loop_over_list(data, startline, stopline)
     del data[startnum:stopnum-1]
-
+    startnum2, stopnum2 = loop_over_list(data, start2, stop2)
     del data[startnum2:stopnum2-1]
     for i in range(0, no_compos):
         j = i + 1
@@ -108,9 +126,16 @@ def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
         data.insert(startnum, "      Langmuir(%d, 2) = .True. \n" %(j))
         data.insert(startnum, "      Yi(%d) =  %.2fd0 \n" %(j, gas_frac[i]))
     data.insert(startnum, "      Ncomp = %d \n" %(no_compos))
+    startnum2, stopnum2 = loop_over_list(data, start2, stop2)
     data.insert(startnum2, output_strings[0] + "\n")
     data.insert(startnum2, output_strings[1] + "\n")
     data.insert(startnum2, output_strings[2] + "\n")
+    startnum3 = loop_over_list(data, start3)
+    del data[startnum3]
+    data.insert(startnum3, prepare_write_strings_testiast_dotf(no_compos,"                Write(25,'(5e20.10)')) P,")+ "\n")
+    startnum4 = loop_over_list(data, start4)
+    del data[startnum4]
+    data.insert(startnum4, prepare_write_strings_testiast_dotf(no_compos,"            Write(25,'(5e20.10)') P,")+ "\n")
 
     with open("debug/testiast.f", "a") as file:
         for num, line in enumerate(data, 1):
@@ -125,8 +150,10 @@ def run_testiast_dotf(temp, i):
 def main():
     p0_lookup, names = p0_dict(400)
     print(names)
-    mix_combi = get_mix_combinations(3, names)
-    gas_frac = get_frac_permutations(3, 10)
-    write_testiast_dotf(temp, mix_combi[3], p0_lookup, gas_frac[0])
+    mix_combi = get_mix_combinations(4, names)
+    gas_frac = get_frac_permutations(4, 10)
+    write_testiast_dotf(temp, mix_combi[11], p0_lookup, gas_frac[12])
+
+
 if __name__ == "__main__":
     main()  
