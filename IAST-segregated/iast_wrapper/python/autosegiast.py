@@ -141,12 +141,10 @@ def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
     return 0;
 
 def run_testiast_dotf():
-    subprocess.call(['sh', './seg_iast.sh'])
+    subprocess.call(['sh', './seg_iast.sh'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     return 0;
     
-def subproc_no_print():
-    retcode = subprocess.call(['echo', 'foo'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-    return 0;
+
 def try_folder_path(temp, mix_combi, path = "../../automated_output"):
     no_compos = len(mix_combi)
     mix_combi = [x.strip(" ") for x in mix_combi]
@@ -199,16 +197,13 @@ def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
 
 def main():
     temp = 400
-    no_molecules = 4
+    no_molecules = 5
     no_gas_fractions = 20
-    subproc_no_print()
+
     p0_lookup, names = p0_dict(temp)
     mix_combi = get_mix_combinations(no_molecules, names)
     gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
-    #write_testiast_dotf(temp, mix_combi[11], p0_lookup, gas_frac[12])
-    #run_testiast_dotf()
-    #output_path = try_folder_path(temp, mix_combi[12])
-    #move_segiast_dotf_output(output_path, gas_frac[12])
+
     automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 
 
