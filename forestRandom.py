@@ -161,7 +161,7 @@ chemstructure=ML_database()
 data_set_raspa, data_set_iast = make_training_database()
     
 x_vals=data_set_iast[:,:-1]
-y_vals=data_set_iast[:,-1]
+y_vals=data_set_iast[:,(len(data_set_iast[0]))-2:]
 
 
 x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals ,test_size= 0.1, random_state=0)  
@@ -172,7 +172,7 @@ regr.fit(x_train, y_train)
 y_pred=regr.predict(x_test) 
 
 rel_err=np.abs(y_pred-y_test)/y_test
-
+rel_err = rel_err[:,0]
 plt.figure()
 plt.title("Performance Decision Tree")
 plt.scatter(range(len(rel_err)), rel_err)
