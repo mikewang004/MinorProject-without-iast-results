@@ -12,6 +12,7 @@ import numpy as np
 import os
 import pandas as pd
 import glob
+import sys
 
 def ML_database():
 
@@ -151,16 +152,139 @@ def make_training_database(chemstructure=ML_database()):
         except KeyError:
             selfie1=np.repeat(chemstructure['22mC5'], data.shape[0]).reshape(52,data.shape[0]).T
             selfie2=np.repeat(chemstructure[m2], data.shape[0]).reshape(52,data.shape[0]).T
-            
         selfie=f1*selfie1+f2*selfie2
         data=np.hstack((selfie,data))
         data_IAST.append(data)
     return np.vstack(data_RASPA),np.vstack(data_IAST)
 
+def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
+    path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
+    path_IAST=glob.glob('IAST-segregated/automated_output/*')
+    
+    data_RASPA=[]
+    data_IAST=[]
+    # print(path_IAST)
+    # sys.exit(0)
+    
+    for file in path_RASPA:
+        file = file.replace("\\", "/") #comment this line if you use linux
+        molecule = file.split('/')[-1].split('-')[0]
+
+        data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+        selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
+        data=np.hstack((selfie,data))
+        data_RASPA.append(data)
+    
+    for path_amount in path_IAST:
+        path_amount = path_amount.replace("\\", "/")
+        # print(path_amount)
+        amount_mols = int(path_amount.split('/')[-1].split('_')[0])
+        # print(amount_mols)
+        if amount_mols>max_amount_mols:
+            break
+        path_temps = glob.glob(path_amount + "/*")
+        for folder in path_temps:
+            folder = folder.replace("\\", "/") #comment this line if you use linux
+            # print(folder)
+            # print(folder.split('/')[-1].split("K")[0])
+            temp = float(folder.split('/')[-1].split("K")[0])
+            # print(folder + "/*.txt")
+            molc_folder = glob.glob(folder + "/*")
+            
+            # print(molc_folder)
+            for mols_mix in molc_folder:
+                mols_mix = mols_mix.replace("\\", "/")
+                # print(mols_mix)
+                # print(type(amount_mols))
+                mols = mols_mix.split('/')[-1].split('-')
+                # print(molc_folder)
+                path_fracs = glob.glob(mols_mix + "/*.txt")
+                for file in path_fracs:
+                    file = file.replace("\\", "/")
+                    fracs = file.split('/')[-1].split('.txt')[0].split("-")
+                    # print(fracs)
+                    fracs = np.array(fracs, dtype=float)
+                    # print(path_fracs)
+                    # print(fracs)
+                    try:
+                        data=np.loadtxt(file,delimiter='   ',skiprows =1, usecols=(range(1,amount_mols+2)))#Pressure, loading m1, loading m2,..., loading mi
+                    except:
+                        print(f"failed to load file: {file}")
+                        continue
+                    if len(mols)<max_amount_mols:
+                        # print(data.shape)
+                        # print(np.zeros((max_amount_mols - len(mols), len(data))).shape)
+                        data = np.append(data, np.zeros((len(data),max_amount_mols - len(mols))), axis =1)
+                    
+                    
+                    # print(data.shape)
+                    selfie = 0
+                    for i, mol in enumerate(mols):
+                        selfie += fracs[i] * np.repeat(chemstructure[mol], data.shape[0]).reshape(52,data.shape[0]).T
+                    # print(selfie.shape)
+                    # print(data.shape)
+                    temp_arr = np.full((len(data), 1), temp) 
+                    data=np.hstack((selfie,temp_arr, data))
+                    data_IAST.append(data)
+    return np.vstack(data_RASPA),np.vstack(data_IAST)
+
 chemstructure=ML_database()
+max_amount_mols = 4
+data_set_raspa, data_set_iast = make_training_database_ver2(max_amount_mols)
+print(data_set_iast)
+# sys.exit(0)
+    
+x_vals=data_set_iast[:,:-max_amount_mols]
+y_vals=data_set_iast[:,(len(data_set_iast[0]))-max_amount_mols:]
+
+x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals ,test_size= 0.1, random_state=0)  
+
+regr = RandomForestRegressor(random_state=0)
+regr.fit(x_train, y_train)
+
+y_pred=regr.predict(x_test) 
+
+rel_err=np.abs(y_pred-y_test)/y_test
+rel_err = rel_err[:,0]
+plt.figure()
+plt.title("Performance Decision Tree (VERSION 2)")
+plt.scatter(range(len(rel_err)), rel_err)
+plt.xlabel("Index of array rel_err")
+plt.ylabel("Relative error of predicted point wrt to known point")
+plt.show()
+
+plt.figure()
+plt.title("Performance Decision Tree (VERSION 2), zoomed in plot")
+plt.scatter(range(len(rel_err)), rel_err)
+plt.ylim(0,0.25)
+plt.xlabel("Index of array rel_err")
+plt.ylabel("Relative error of predicted point wrt to known point")
+plt.show()
+
+rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
+rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
+mean_rel_err = np.mean(rel_err)
+print(mean_rel_err)
+
+plt.figure()
+plt.title("Performance Decision Tree (VERSION 2), logaritmic plot")
+plt.scatter(range(len(rel_err)), rel_err, label="Relative error point i")
+plt.hlines(mean_rel_err, xmin = 0, xmax = len(rel_err), color="red", label="Mean relative error")
+plt.yscale("log")
+plt.xlabel("Index of array rel_err")
+plt.ylabel("Relative error of predicted point wrt to known point")
+plt.legend()
+plt.show()
+
+rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
+rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
+mean_rel_err = np.mean(rel_err)
+print(mean_rel_err)
+
+"""Version 1, don't change is backup"""
 data_set_raspa, data_set_iast = make_training_database()
     
-x_vals=data_set_iast[:,:-1]
+x_vals=data_set_iast[:,:(len(data_set_iast[0]))-2]
 y_vals=data_set_iast[:,(len(data_set_iast[0]))-2:]
 
 
@@ -174,14 +298,14 @@ y_pred=regr.predict(x_test)
 rel_err=np.abs(y_pred-y_test)/y_test
 rel_err = rel_err[:,0]
 plt.figure()
-plt.title("Performance Decision Tree")
+plt.title("Performance Decision Tree (VERSION 1)")
 plt.scatter(range(len(rel_err)), rel_err)
 plt.xlabel("Index of array rel_err")
 plt.ylabel("Relative error of predicted point wrt to known point")
 plt.show()
 
 plt.figure()
-plt.title("Performance Decision Tree, zoomed in plot")
+plt.title("Performance Decision Tree (VERSION 1), zoomed in plot")
 plt.scatter(range(len(rel_err)), rel_err)
 plt.ylim(0,0.25)
 plt.xlabel("Index of array rel_err")
@@ -194,7 +318,7 @@ mean_rel_err = np.mean(rel_err)
 print(mean_rel_err)
 
 plt.figure()
-plt.title("Performance Decision Tree, logaritmic plot")
+plt.title("Performance Decision Tree (VERSION 1), logaritmic plot")
 plt.scatter(range(len(rel_err)), rel_err, label="Relative error point i")
 plt.hlines(mean_rel_err, xmin = 0, xmax = len(rel_err), color="red", label="Mean relative error")
 plt.yscale("log")
@@ -203,10 +327,6 @@ plt.ylabel("Relative error of predicted point wrt to known point")
 plt.legend()
 plt.show()
 
-# rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
-# rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
-# mean_rel_err = np.mean(rel_err)
-# print(mean_rel_err)
 
 
 
