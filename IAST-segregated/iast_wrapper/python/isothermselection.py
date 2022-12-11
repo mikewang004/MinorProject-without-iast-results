@@ -47,8 +47,8 @@ def autoselect_p0_DS_Langmuir(data, name):
 
 input_path = "../../../Raspa/outputs/"
 input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
-temp = 400
-input1 = "23mC5"
+temp = 500
+input1 = "24mC5"
 #mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
 mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
 
