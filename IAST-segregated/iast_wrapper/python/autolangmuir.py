@@ -96,7 +96,7 @@ def auto_fit_plot_Langmuir(temp, input_name = None, input_path = None):
         save_p0_plot(mol_1_iso, sel_data, name)
         #print("Finised molecule %s." %name)
     output1 = np.zeros(4)
-    with open('p0_values-%d.txt' %temp, "w") as f:
+    with open('new_p0/p0_values-%d.txt' %temp, "w") as f:
         for i in range(0, len(output)):
             output1 = np.array( output[i])
             f.write("%s \t %s \n" %(mol_names[i], output1))
