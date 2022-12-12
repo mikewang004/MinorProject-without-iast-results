@@ -122,6 +122,7 @@ def make_IAST_database(chemstructure=ML_database):
     data_4=[]
     data_5=[]
     for file in path_IAST: 
+        file = file.replace('\\','/')
         folders=file.split('/')
         temp=int( folders[3][:3] )
         molnum=int(folders[2][0] )
@@ -171,6 +172,7 @@ def make_IAST_database(chemstructure=ML_database):
             data=np.hstack((selfie,data))
             data_4.append(data)
         elif molnum==5:
+    
             m1=folders[4].split("-")[0]
             m2=folders[4].split("-")[1]
             m3=folders[4].split("-")[2]
@@ -255,3 +257,73 @@ def make_IAST_database_ver2(nummol, chemstructure=ML_database):
     x_vals=data_IAST[:,:-nummol] 
     y_vals=data_IAST[:,(len(data_IAST[0]))-nummol:]    
     return x_vals, y_vals
+
+def make_IAST_database_Wessel_version(chemstructure,n_molecule_combinations, only_max_combinations = False,):
+    
+    """
+    Generate inputvectordata and outputvectordata 
+    
+    :param chemstructure: database which contains the molecule representation
+    :param n_molecule_combinations: maximum number of different molecules in a single mixture
+    :param only_max_combinations: 
+        -if False every different molecule mixture up to the max different molecules will be put in the dataset
+        -if true: only the max different molecule mixtures will be included into the dataset
+        
+    :return the inputvector_data: the inputvectors from the dataset which is structured the following:
+            [molfraction1,chemstructure1, molfraction2, chemstructure2,...,molfractionN, chemstructureN]
+    :return the outputvector_data: the inputvectors from the dataset which is structured the following:
+             [loadingmolecule1,loadingmolecul2,..,loadingmoleculeN]
+    """
+    
+    path_IAST=glob.glob('IAST-segregated/automated_output/**/**/**/*.txt') #looking for all the IAST files
+    
+    Length_inputvector = (len(chemstructure["C7"]) +1 ) * n_molecule_combinations #determining the lenght of the inputvector
+    total_data = []
+    
+    "going over every file in the directory " 
+    for file in path_IAST: 
+        file = file.replace('\\','/') #"linux conversion stuff"
+        folders=file.split('/')
+        
+        temperature=int( folders[3][:3] ) # getting the temperature
+        molnum=int(folders[2][0] ) #getting the number of n mixure molecules
+        
+        """checking of the number of molecules in the mixture is larger than what we want 
+            if so than skip this file"""
+        
+        if only_max_combinations:
+            if molnum != n_molecule_combinations:
+                continue
+            
+        if molnum > n_molecule_combinations: 
+            continue
+        
+        """loading in data"""
+        data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float) 
+        data=np.insert(data,obj=1,axis=1,values=temperature) #inserting the temperatyr 
+        
+        """getting molecule names and mixture ratios from the paths"""
+        moleculenames = folders[4].split("-") #list of the molecule names
+        mixtureratios = folders[-1].replace(".txt","").split("-")   #getting mixture ratios  from foldername 
+        
+        
+        """creating the input vector"""
+        inputvector = np.array([])
+        for mixtureratio , molecule in zip( mixtureratios , moleculenames):
+            inputvector = np.hstack((inputvector,float(mixtureratio),chemstructure[molecule]))
+
+        """making sure that the array is correct size and otherwise adding zeros until it is the desired length"""      
+        checklength = len(inputvector)
+        if checklength < Length_inputvector :
+            inputvector = np.hstack((inputvector, np.zeros( ( Length_inputvector - checklength)) ) )
+      
+        """Adding the chemstructure to each pressure """
+        inputvector =np.repeat(inputvector, data.shape[0]).reshape(Length_inputvector ,data.shape[0]).T
+        
+        data=np.hstack((inputvector,data))
+        total_data.append(data)
+           
+    total_data = np.vstack(total_data) #stacking vertically so that it becomes a 2D array instead of 3D array
+        
+
+    return total_data[:,:(Length_inputvector+2)], total_data[:,Length_inputvector+2:]
