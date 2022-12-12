@@ -1,14 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov  5 21:21:43 2022
-
-@author: Wessel Albers
-"""
-
 import selfies as sf
 import numpy as np
-import os
-import pandas as pd
+# import os
+# import pandas as pd
 import glob
 
 def ML_database():
@@ -84,7 +77,7 @@ def make_RASPA_database(chemstructure=ML_database()):
 
         #Removing pressures that are too high
         data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
-        
+        # np.savetxt(file,data,delimiter=',',header='pressure,muc,muc_err,molkg,molkg_err,_')
         #adding temperature
         temp=int( file.split('/')[-1].split("out")[0][-3:] )
         data=np.insert(data,obj=1,axis=1,values=temp*np.ones(np.shape(data)[0]))
