@@ -25,7 +25,7 @@ def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
 def p0_dict(temp, path = None):
     p0_dict = {}
     if path == None:
-        with open("p0_values-%d.txt" %temp) as file:
+        with open("new_p0/p0_values-%d.txt" %temp) as file:
             for line in file:
                 name, p0 = line.split("\t")
                 p0 = p0.replace('[', ''); p0 = p0.replace(']', '');
@@ -48,8 +48,7 @@ def get_frac_permutations(n_mols, n_frac = 10):
     "Returns all possible combinations of n molecules"
     gas_array = np.linspace(0, 1, n_frac+1)
     gas_fracs = np.array(list(permutations(gas_array, n_mols)))
-    if n_mols != 2:
-        gas_fracs = gas_fracs[~np.any(gas_fracs == 0.0, axis=1)] #Note that an [n] mixture with one fraction = 0 is an [n] -1 mixture
+    gas_fracs = gas_fracs[~np.any(gas_fracs == 0.0, axis=1)] #Note that an [n] mixture with one fraction = 0 is an [n] -1 mixture
     return gas_fracs[np.isclose(np.sum(gas_fracs, axis=1), 1.0), :]
 
 def lookup_mix_dict(mix_combi, p0_dict):
@@ -186,7 +185,6 @@ def seg_iast_one_combi_loop(temp, p0_lookup, mix_combi, gas_frac):
 def automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac):
     "Computes seg-iast all possbile combinations of [n] molecules."
     no_mol_iter = np.shape(mix_combi)
-    print(no_mol_iter)
     for i in range(0, no_mol_iter[0]):
         seg_iast_one_combi_loop(temp, p0_lookup, mix_combi[i], gas_frac)
     return 0;
@@ -197,17 +195,26 @@ def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
     return 0;
 
-
-
+def automatic_no_mols_seg_iast(temp, p0_lookup,names, max_no_mols = 5, low_no_frac = 10, high_no_frac = 20):
+    mols = np.arange(2, max_no_mols +1)
+    for no_molecules in mols:
+        if no_molecules > 3:
+            no_gas_fractions = high_no_frac
+        else:
+            no_gas_fractions = low_no_frac
+        mix_combi = get_mix_combinations(no_molecules, names)
+        gas_frac = get_frac_permutations(int(no_molecules), int(no_gas_fractions))
+        automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 def main():
-    temp = 400
-    no_molecules = 6
-    no_gas_fractions = 25
-
+    temp = 500
+    #no_molecules = 6
+    #no_gas_fractions = 25
+    
     p0_lookup, names = p0_dict(temp)
-    mix_combi = get_mix_combinations(no_molecules, names)
-    gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
-    automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
+    automatic_no_mols_seg_iast(temp, p0_lookup, names)
+    #mix_combi = get_mix_combinations(no_molecules, names)
+    #gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
+    #automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 
 
 if __name__ == "__main__":

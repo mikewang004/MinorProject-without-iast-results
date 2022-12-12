@@ -23,46 +23,46 @@ C     Start for Python1
       Langmuir(5, 1) = .True. 
       Pow(5, 2) = 1.0d0 
       Pow(5, 1) = 1.0d0 
-      Nimax(5, 2) = 0.483846d0 
-      Nimax(5, 1) = 0.686442d0 
-      Ki(5, 2) = 0.00001472505d0 
-      Ki(5, 1) = 0.05036542620d0 
+      Nimax(5, 2) = 0.004168d0 
+      Nimax(5, 1) = 0.737001d0 
+      Ki(5, 2) = 2938.80509000000d0 
+      Ki(5, 1) = 0.00026896701d0 
       Yi(4) =  0.10d0 
       Langmuir(4, 2) = .True. 
       Langmuir(4, 1) = .True. 
       Pow(4, 2) = 1.0d0 
       Pow(4, 1) = 1.0d0 
-      Nimax(4, 2) = 0.681315d0 
-      Nimax(4, 1) = 1.002204d0 
-      Ki(4, 2) = 0.00274614593d0 
-      Ki(4, 1) = 0.00000000087d0 
+      Nimax(4, 2) = 0.667098d0 
+      Nimax(4, 1) = 1.247270d0 
+      Ki(4, 2) = 0.00015622902d0 
+      Ki(4, 1) = 0.00000000142d0 
       Yi(3) =  0.15d0 
       Langmuir(3, 2) = .True. 
       Langmuir(3, 1) = .True. 
       Pow(3, 2) = 1.0d0 
       Pow(3, 1) = 1.0d0 
-      Nimax(3, 2) = 0.249054d0 
-      Nimax(3, 1) = 0.445821d0 
-      Ki(3, 2) = 0.00188345000d0 
-      Ki(3, 1) = 0.00188345000d0 
+      Nimax(3, 2) = 0.330950d0 
+      Nimax(3, 1) = 0.363662d0 
+      Ki(3, 2) = 0.00018168848d0 
+      Ki(3, 1) = 0.00018169289d0 
       Yi(2) =  0.20d0 
       Langmuir(2, 2) = .True. 
       Langmuir(2, 1) = .True. 
       Pow(2, 2) = 1.0d0 
       Pow(2, 1) = 1.0d0 
-      Nimax(2, 2) = 0.815591d0 
-      Nimax(2, 1) = 0.680083d0 
-      Ki(2, 2) = 0.00000000305d0 
-      Ki(2, 1) = 0.01566807000d0 
+      Nimax(2, 2) = 0.026185d0 
+      Nimax(2, 1) = 0.696033d0 
+      Ki(2, 2) = 0.00000000000d0 
+      Ki(2, 1) = 1.11205024000d0 
       Yi(1) =  0.50d0 
       Langmuir(1, 2) = .True. 
       Langmuir(1, 1) = .True. 
       Pow(1, 2) = 1.0d0 
       Pow(1, 1) = 1.0d0 
-      Nimax(1, 2) = 0.234467d0 
-      Nimax(1, 1) = 0.461372d0 
-      Ki(1, 2) = 0.02310090000d0 
-      Ki(1, 1) = 0.02310055000d0 
+      Nimax(1, 2) = 0.225624d0 
+      Nimax(1, 1) = 0.467340d0 
+      Ki(1, 2) = 0.00003254606d0 
+      Ki(1, 1) = 0.00003254683d0 
 C     End for Python1
 
 
@@ -70,7 +70,7 @@ C     End for Python1
       P   = 1.0d4
       Call Seg_Iast(Ni,Xi1,Molfrac,Yi,P,Nterm_max,Carrier_gas)
 C     Start for Python2
-      write(25,'(A)') "  Pressure (Pa) 2mC6-400 (mol/kg) 3mC6-400 (mol/kg) 33mC5-400 (mol/kg) 23mC5-400 (mol/kg) C7-400 (mol/kg)" 
+      write(25,'(A)') "  Pressure (Pa) 23mC5-500 (mol/kg) 24mC5-500 (mol/kg) 2mC6-500 (mol/kg) 3mC6-500 (mol/kg) C7-500 (mol/kg)" 
       write(6,'(2e20.10)') Ni(1),Ni(2),Ni(3),Ni(4),Ni(5)
       write(6,*) 'Ni(1)   ','Ni(2)   ','Ni(3)   ','Ni(4)   ','Ni(5)   '
 C     End for Python2
