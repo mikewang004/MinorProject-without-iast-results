@@ -36,21 +36,22 @@ def autoselect_p0_DS_Langmuir(data, name):
     "Returns the average p0 value."
     data = data[:, data.min(axis=0)>=10e-20] 
     #np.savetxt("debug/data1-%s.txt" %name, data)
-    print(data.shape)
+    if data[:, data[1, :] > data[3, :]].size == 0:
+        data[[1, 3]] = data[[3, 1]]
+        data[[0, 2]] = data[[2, 0]]
     data = data[:, data[1, :] > data[3, :]]
-    print(data.shape)
     #np.savetxt("debug/data2-%s.txt" %name, data)
     data = np.delete(data, np.isnan(data).any(axis=0), axis=1)
-    print(data)
+    #print(data)
     print(np.average(data, axis=1))
     return np.average(data, axis=1)
 
 input_path = "../../../Raspa/outputs/"
 input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
-temp = 500
-input1 = "24mC5"
+temp = 300
+input1 = "23mC5"
 #mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
-mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
+mol_1_path = input_path + "%s/%s-%dout.txt" %(input1, input1, temp)
 
 data = np.loadtxt("p0_output/%s-%dp0.txt" % (input1, temp))
 mol1para = return_molkg_pressure(df.read_csv(mol_1_path))
