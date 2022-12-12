@@ -1,14 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov  5 21:21:43 2022
-
-@author: Wessel Albers
-"""
-
 import selfies as sf
 import numpy as np
-import os
-import pandas as pd
+# import os
+# import pandas as pd
 import glob
 
 def ML_database():
@@ -53,101 +46,146 @@ def simple_database():
     return database
 
 
-def data_gathering(path_to_output):
-    data = {}
-    outputmaps = os.listdir(path_to_output)
-    for outputmap in outputmaps:
-        mappath = path_to_output + "/" + str(outputmap)
-        if os.path.isdir(mappath):
-            files = os.listdir(mappath)
-            for file in files:
-                try:
-                    paths =  mappath + "/" + str(file)
-                    label = file.split("out")[0]
-                   #print(label)
-                    df = pd.read_table(paths, delimiter = ",")
-                    #df = df.set_index("pressure")
-                    data[label] = df.drop(["_","muc", "muc_err"], axis = 1)
-                    #print(data)
-                except:
-                    print("ERROR !!!, please check " + file + " \n")
-    return data
+# def data_gathering(path_to_output):#outdated function
+#     data = {}
+#     outputmaps = os.listdir(path_to_output)
+#     for outputmap in outputmaps:
+#         mappath = path_to_output + "/" + str(outputmap)
+#         if os.path.isdir(mappath):
+#             files = os.listdir(mappath)
+#             for file in files:
+#                 try:
+#                     paths =  mappath + "/" + str(file)
+#                     label = file.split("out")[0]
+#                    #print(label)
+#                     df = pd.read_table(paths, delimiter = ",")
+#                     #df = df.set_index("pressure")
+#                     data[label] = df.drop(["_","muc", "muc_err"], axis = 1)
+#                     #print(data)
+#                 except:
+#                     print("ERROR !!!, please check " + file + " \n")
+#     return data
 
-def RASPA_database():
+def make_RASPA_database(chemstructure=ML_database()):
     path_to_out="Raspa/outputs/**/*.txt"
-    new_path="MachineLearning/Outputs_RASPA/"
+    data_RASPA=[]
     
     paths = glob.glob(path_to_out)
-    # database=np.array(len(paths))
     for file in paths:
-        print(file)
-        # molecule = file.split('/')[-1].split('-')[0]
+        molecule = file.split('/')[-1].split('-')[0]
         data=np.genfromtxt(file,delimiter=',',usecols=(0,3),skip_header=1)
 
         #Removing pressures that are too high
         data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
-        
+        # np.savetxt(file,data,delimiter=',',header='pressure,muc,muc_err,molkg,molkg_err,_')
         #adding temperature
         temp=int( file.split('/')[-1].split("out")[0][-3:] )
         data=np.insert(data,obj=1,axis=1,values=temp*np.ones(np.shape(data)[0]))
         
-        fname=file.split('/')[-1]
-        np.savetxt(new_path+fname, data,header='pressure,temperature,molkg',delimiter=',')
-        
-def IAST_database():
-    path_to_out='MachineLearning/Outputs_IAST'
-    paths = glob.glob(path_to_out + "/*.txt")
-    
-    new_path="MachineLearning/Outputs_IAST/"
-    for file in paths:
-        #Removing pressures that are too high
-        data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
-        data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
-        
-        length=np.ones(np.shape(data)[0])
-        file_split=file.split('-')
-        
-        temp=int(file_split[1])
-        f1=float(file_split[2][:3])
-        f2=float(file_split[-1][:3])
-        
-        data=np.insert(data,obj=1,axis=1,values=temp*length)
-        data=np.insert(data,obj=2,axis=1,values=f1*length)
-        data=np.insert(data,obj=3,axis=1,values=f2*length)
-        
-        fname=file.split('/')[-1]
-        np.savetxt(new_path+fname, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
-
-def make_training_database(chemstructure=ML_database()):
-    path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
-    path_IAST=glob.glob('MachineLearning/Outputs_IAST/*.txt')
-    
-    data_RASPA=[]
-    data_IAST=[]
-    for file in path_RASPA:
-        molecule = file.split('/')[-1].split('-')[0]
-
-        data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+        #adding selfie
         selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
         data=np.hstack((selfie,data))
         data_RASPA.append(data)
         
-    for file in path_IAST:
-        m1=file.split('/')[-1].split('-')[0]
-        m2=file.split('/')[-1].split('-')[2][5:]
+    return np.vstack(data_RASPA)
         
-        f1=float( file.split('/')[-1].split('-')[2][:4] )
-        f2=1-f1
-        data=np.loadtxt(file,delimiter=',',skiprows=1,usecols=(0,1,-2,-1))
-        try:
-            selfie1=np.repeat(chemstructure[m1], data.shape[0]).reshape(52,data.shape[0]).T
-            selfie2=np.repeat(chemstructure[m2], data.shape[0]).reshape(52,data.shape[0]).T
-        except KeyError:
-            selfie1=np.repeat(chemstructure['22mC5'], data.shape[0]).reshape(52,data.shape[0]).T
-            selfie2=np.repeat(chemstructure[m2], data.shape[0]).reshape(52,data.shape[0]).T
-            
-        selfie=f1*selfie1+f2*selfie2
-        data=np.hstack((selfie,data))
-        data_IAST.append(data)
-    return data_RASPA,data_IAST
+# def IAST_database():#outdated: uses old IAST outputs, only for 2 molecules
+#     path_to_out='MachineLearning/Outputs_IAST'
+#     paths = glob.glob(path_to_out + "/*.txt")
+    
+#     new_path="MachineLearning/Outputs_IAST/"
+#     for file in paths:
+#         #Removing pressures that are too high
+#         data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
+#         data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
+        
+#         length=np.ones(np.shape(data)[0])
+#         file_split=file.split('-')
+        
+#         temp=int(file_split[1])
+#         f1=float(file_split[2][:3])
+#         f2=float(file_split[-1][:3])
+        
+#         data=np.insert(data,obj=1,axis=1,values=temp*length)
+#         data=np.insert(data,obj=2,axis=1,values=f1*length)
+#         data=np.insert(data,obj=3,axis=1,values=f2*length)
+        
+#         fname=file.split('/')[-1]
+#         np.savetxt(new_path+fname, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
 
+def make_IAST_database(chemstructure=ML_database):
+    
+    path_IAST=glob.glob('IAST-segregated/automated_output/**/**/**/*.txt')
+    chemstructure=ML_database()
+    data_2=[]
+    data_3=[]
+    data_4=[]
+    data_5=[]
+    for file in path_IAST: 
+        folders=file.split('/')
+        temp=int( folders[3][:3] )
+        molnum=int(folders[2][0] )
+        data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
+        data=np.insert(data,obj=1,axis=1,values=temp)
+        
+        if molnum==2:
+            m1=folders[4].split("-")[0]
+            m2=folders[4].split("-")[1]
+            
+            f1=float( folders[-1].split('-')[0] )
+            f2=1-f1
+            
+            selfie=f1*chemstructure[m1]+f2*chemstructure[m2]
+            selfie=np.repeat(selfie, data.shape[0]).reshape(52,data.shape[0]).T
+            
+            data=np.hstack((selfie,data))
+            data_2.append(data)
+        elif molnum==3:
+            m1=folders[4].split("-")[0]
+            m2=folders[4].split("-")[1]
+            m3=folders[4].split("-")[2]
+            
+            f1=float( folders[-1].split('-')[0])
+            f2=float( folders[-1].split('-')[1])
+            f3=1-(f1+f2)
+            
+            selfie=f1*chemstructure[m1]+f2*chemstructure[m2]+f3*chemstructure[m3]
+            selfie=np.repeat(selfie, data.shape[0]).reshape(52,data.shape[0]).T
+            
+            data=np.hstack((selfie,data))
+            data_3.append(data)
+        elif molnum==4:
+            m1=folders[4].split("-")[0]
+            m2=folders[4].split("-")[1]
+            m3=folders[4].split("-")[2]
+            m4=folders[4].split("-")[3]
+            
+            f1=float( folders[-1].split('-')[0])
+            f2=float( folders[-1].split('-')[1])
+            f3=float( folders[-1].split('-')[2])
+            f4=1-(f1+f2+f3)
+            
+            selfie=f1*chemstructure[m1]+f2*chemstructure[m2]+f3*chemstructure[m3]+f4*chemstructure[m4]
+            selfie=np.repeat(selfie, data.shape[0]).reshape(52,data.shape[0]).T
+            
+            data=np.hstack((selfie,data))
+            data_4.append(data)
+        elif molnum==5:
+            m1=folders[4].split("-")[0]
+            m2=folders[4].split("-")[1]
+            m3=folders[4].split("-")[2]
+            m4=folders[4].split("-")[3]
+            m5=folders[4].split("-")[4]
+            
+            f1=float( folders[-1].split('-')[0])
+            f2=float( folders[-1].split('-')[1])
+            f3=float( folders[-1].split('-')[2])
+            f4=float( folders[-1].split('-')[3])
+            f5=1-(f1+f2+f3+f4)
+            
+            selfie=f1*chemstructure[m1]+f2*chemstructure[m2]+f3*chemstructure[m3]+f4*chemstructure[m4]+f5*chemstructure[m5]
+            selfie=np.repeat(selfie, data.shape[0]).reshape(52,data.shape[0]).T
+            
+            data=np.hstack((selfie,data))
+            data_5.append(data)
+    return np.vstack(data_2),np.vstack(data_3),np.vstack(data_4),np.vstack(data_5)
