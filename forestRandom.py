@@ -158,22 +158,22 @@ def make_training_database(chemstructure=ML_database()):
     return np.vstack(data_RASPA),np.vstack(data_IAST)
 
 def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
-    path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
+    # path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
     path_IAST=glob.glob('IAST-segregated/automated_output/*')
     
-    data_RASPA=[]
+    # data_RASPA=[]
     data_IAST=[]
     # print(path_IAST)
     # sys.exit(0)
     
-    for file in path_RASPA:
-        file = file.replace("\\", "/") #comment this line if you use linux
-        molecule = file.split('/')[-1].split('-')[0]
+    # for file in path_RASPA:
+    #     file = file.replace("\\", "/") #comment this line if you use linux
+    #     molecule = file.split('/')[-1].split('-')[0]
 
-        data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
-        selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
-        data=np.hstack((selfie,data))
-        data_RASPA.append(data)
+    #     data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+    #     selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
+    #     data=np.hstack((selfie,data))
+    #     data_RASPA.append(data)
     
     for path_amount in path_IAST:
         path_amount = path_amount.replace("\\", "/")
@@ -210,7 +210,8 @@ def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
                         data=np.loadtxt(file,delimiter='   ',skiprows =1, usecols=(range(1,amount_mols+2)))#Pressure, loading m1, loading m2,..., loading mi
                     except:
                         print(f"failed to load file: {file}")
-                        continue
+                        print(mols_mix)
+                        break
                     if len(mols)<max_amount_mols:
                         # print(data.shape)
                         # print(np.zeros((max_amount_mols - len(mols), len(data))).shape)
@@ -226,11 +227,11 @@ def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
                     temp_arr = np.full((len(data), 1), temp) 
                     data=np.hstack((selfie,temp_arr, data))
                     data_IAST.append(data)
-    return np.vstack(data_RASPA),np.vstack(data_IAST)
+    return np.vstack(data_IAST)
 
 chemstructure=ML_database()
-max_amount_mols = 3
-data_set_raspa, data_set_iast = make_training_database_ver2(max_amount_mols)
+max_amount_mols = 4
+data_set_iast = make_training_database_ver2(max_amount_mols)
 print(data_set_iast)
 # sys.exit(0)
     
