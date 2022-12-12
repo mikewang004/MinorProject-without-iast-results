@@ -189,3 +189,69 @@ def make_IAST_database(chemstructure=ML_database):
             data=np.hstack((selfie,data))
             data_5.append(data)
     return np.vstack(data_2),np.vstack(data_3),np.vstack(data_4),np.vstack(data_5)
+
+
+def make_IAST_database_ver2(nummol, chemstructure=ML_database):
+    """
+    Enter the number of molecules you want to mix (nummol). The function will
+    in default use the ML_database for the chemical structure of the molecules, 
+    which is a dictionary containing all selfie structures of the used 
+    molecules.
+    The function will return the x and y values of the IAST-data:
+     * The variable x_vals is an 2D array which contains of multiple arrays 
+       filled with the following: fraction of mixture molecule
+       1, selfies code molecule 1, ..., fraction of mixture molecule nummol, 
+       selfies code molecule nummol, the pressure, the temprature. In each 
+       array (inside x_vals) is either the pressure or temprature is varied.
+     * The variable y_vals contains the following: loading of molecule 1, ...,
+       loading of molecule nummol. 
+       
+    With the return values of this function you can create a train and test
+    data set for your machine learning algorithm, using the following code 
+    snippet:
+        
+    x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals,
+                                            test_size= 0.1, random_state=0)  
+    """
+    #create list of all paths to the data files of the mixture of nummol molecules:
+    path_IAST=glob.glob(f'IAST-segregated/automated_output/{nummol}_molecules/**/**/*.txt')
+    
+    chemstructure=ML_database()
+    data_IAST =[]
+    for file in path_IAST: 
+        file = file.replace("\\", "/") #comment this line if you use linux
+        folders=file.split('/') #creates a list of all folders in the directory leading to the file
+        temp=int( folders[3][:3] ) #extracts the temperature of the mixture from the folders list
+        
+        #load data and insert the temperature at the end of each row of data:
+        data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float) 
+        data=np.insert(data,obj=1,axis=1,values=temp)
+        
+        for molnum in range(nummol):
+            #create an array of the fraction (frac) and selfie (selfie) of 
+            #molecule molnum and add it to the array frac_selfie, where the two
+            #are combined. After the for loop the array frac_selfie contains
+            #of rows filled with the fraction of molecule 1, selfie of molecule
+            #1, ..., fraction of molecule nummol, selfie of nummol. frac_selfie
+            #contains of the same amount of columns as the data array and each
+            #row is identical.
+            frac =  np.full((len(data), 1), float(folders[-1].split('-')[molnum].split(".txt")[0]))
+            selfie = np.repeat(chemstructure[folders[4].split("-")[molnum]], data.shape[0]).reshape(52,data.shape[0]).T
+            if molnum == 0:
+                frac_selfie = np.hstack((frac, selfie))
+            else:
+                frac_selfie = np.hstack((frac_selfie, frac, selfie))
+        
+        #combine the frac_selfie array and the data array into one array. And 
+        #append the combined array to data_IAST, which will gather all combined 
+        #arrays:
+        data=np.hstack((frac_selfie,data)) 
+        data_IAST.append(data)
+    
+    data_IAST = np.vstack(data_IAST) #reorder the array
+    
+    #seperate the input values (x_vals) and output values (y_vals) from the 
+    #combined data set (data_IAST):
+    x_vals=data_IAST[:,:-nummol] 
+    y_vals=data_IAST[:,(len(data_IAST[0]))-nummol:]    
+    return x_vals, y_vals
