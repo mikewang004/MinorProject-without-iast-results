@@ -21,8 +21,7 @@ def load_raspa(temp, path = "../../../Raspa/outputs"):
             if str(temp) in names:
                 mol_names.append(names.partition("-")[0])
                 #print(names)
-                mol_csvs.append(root + "/" + names)
-    print(mol_csvs)                
+                mol_csvs.append(root + "/" + names)               
     return mol_csvs, mol_names
 
 
@@ -84,13 +83,16 @@ def save_p0_plot(mol1iso, sel_data, input1):
     plt.close()
 
 def check_if_iso_exists(temp, mol_paths, mol_names, path = "new_p0/"):
-    with open(path + "p0_values-%d.txt" %(temp), "r") as file:
-        for line in file:
-            for s in mol_names:
-                if s in line:
-                    del mol_paths[mol_names.index(s)]
-                    mol_names.remove(s)
-    return mol_paths, mol_names
+    try:
+        with open(path + "p0_values-%d.txt" %(temp), "r") as file:
+            for line in file:
+                for s in mol_names:
+                    if s in line:
+                        del mol_paths[mol_names.index(s)]
+                        mol_names.remove(s)
+        return mol_paths, mol_names
+    except:
+        return mol_paths, mol_names
 
 def auto_fit_plot_Langmuir(temp, calc_all = False, input_name = None, input_path = None):
     if input_name == None:
@@ -127,8 +129,8 @@ def input_wrapper_langmuir():
 #name = "22mC5"
 #paths = "../../../Raspa/%s/%s-%dout.txt" %(name, name, temp)
 def main():
-    temp = 300
-    #auto_fit_plot_Langmuir(temp)
+    temp = 600
+    auto_fit_plot_Langmuir(temp)
     input_wrapper_langmuir()
 
 if __name__ == "__main__":
