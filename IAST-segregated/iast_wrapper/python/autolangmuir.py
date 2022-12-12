@@ -51,6 +51,7 @@ def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7):
     p0_array = np.zeros([4, k1_its * k1_its * q_its * q_its])
     m = 0 #helper variable
     print("Started for-loop.")
+    
     for i in range(0, k1_its):#loop first over k1,q1 
         for k in range(0, k1_its):
             for l in range (0, q_its):
@@ -91,12 +92,12 @@ def auto_fit_plot_Langmuir(temp, input_name = None, input_path = None):
     #for i in range(0, 2):
         mol_1_iso, name = df.read_csv(paths[i]), mol_names[i]
         mol1para = return_molkg_pressure(mol_1_iso)
-        sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso))
+        sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso), name)
         output.append(sel_data)
         save_p0_plot(mol_1_iso, sel_data, name)
         #print("Finised molecule %s." %name)
     output1 = np.zeros(4)
-    with open('p0_values-%d.txt' %temp, "w") as f:
+    with open('new_p0/p0_values-%d.txt' %temp, "w") as f:
         for i in range(0, len(output)):
             output1 = np.array( output[i])
             f.write("%s \t %s \n" %(mol_names[i], output1))

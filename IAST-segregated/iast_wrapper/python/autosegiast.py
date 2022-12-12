@@ -25,7 +25,7 @@ def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
 def p0_dict(temp, path = None):
     p0_dict = {}
     if path == None:
-        with open("p0_values-%d.txt" %temp) as file:
+        with open("new_p0/p0_values-%d.txt" %temp) as file:
             for line in file:
                 name, p0 = line.split("\t")
                 p0 = p0.replace('[', ''); p0 = p0.replace(']', '');
@@ -48,8 +48,7 @@ def get_frac_permutations(n_mols, n_frac = 10):
     "Returns all possible combinations of n molecules"
     gas_array = np.linspace(0, 1, n_frac+1)
     gas_fracs = np.array(list(permutations(gas_array, n_mols)))
-    if n_mols != 2:
-        gas_fracs = gas_fracs[~np.any(gas_fracs == 0.0, axis=1)] #Note that an [n] mixture with one fraction = 0 is an [n] -1 mixture
+    gas_fracs = gas_fracs[~np.any(gas_fracs == 0.0, axis=1)] #Note that an [n] mixture with one fraction = 0 is an [n] -1 mixture
     return gas_fracs[np.isclose(np.sum(gas_fracs, axis=1), 1.0), :]
 
 def lookup_mix_dict(mix_combi, p0_dict):
@@ -77,16 +76,18 @@ def prepare_strings_testiast_dotf(no_compos, mix_combi, temp):
     mix_combi = [x.strip(" ") for x in mix_combi]
     str1 = "      write(6,*) "
     str2 = "      write(6,'(2e20.10)') "
-    str3 = """      write(25,'(A)')   "     Pressure (Pa)"""
+    str3 = """      write(25,'(A)') "  Pressure (Pa)"""
     for i in range(0, no_compos):
         if i == (no_compos -1):
             str1 += str("'Ni(%d)   '" %(i+1))
             str2 += str("Ni(%d)" %(i+1))
-            str3 += str("""     %s-%d (mol/kg)" """ %(mix_combi[i], temp))
+            #str3 += str("""     %s-%d (mol/kg)" """ %(mix_combi[i], temp))
+            str3 += str(""" %s-%d (mol/kg)" """ %(mix_combi[i], temp))
         else:
             str1 += str("'Ni(%d)   '," %(i+1))
             str2 += str("Ni(%d)," %(i+1))
-            str3 += str("     %s-%d (mol/kg)" %(mix_combi[i], temp))
+            #str3 += str("     %s-%d (mol/kg)" %(mix_combi[i], temp))
+            str3 += str(" %s-%d (mol/kg)" %(mix_combi[i], temp))
     return str1, str2, str3
 
 def prepare_write_strings_testiast_dotf(no_compos, str1):
@@ -130,10 +131,10 @@ def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
     data.insert(startnum2, output_strings[2] + "\n")
     startnum3 = loop_over_list(data, start3)
     del data[startnum3]
-    data.insert(startnum3, prepare_write_strings_testiast_dotf(no_compos,"                Write(25,'(5e20.10)') P,")+ "\n")
+    data.insert(startnum3, prepare_write_strings_testiast_dotf(no_compos,"                Write(25,'(20e20.10)') P,")+ "\n")
     startnum4 = loop_over_list(data, start4)
     del data[startnum4]
-    data.insert(startnum4, prepare_write_strings_testiast_dotf(no_compos,"            Write(25,'(5e20.10)') P,")+ "\n")
+    data.insert(startnum4, prepare_write_strings_testiast_dotf(no_compos,"            Write(25,'(20e20.10)') P,")+ "\n")
 
     with open("../fortran/testiast.f", "a") as file:
         for num, line in enumerate(data, 1):
@@ -142,6 +143,7 @@ def write_testiast_dotf(temp, mix_combi, p0_dict, gas_frac):
 
 def run_testiast_dotf():
     subprocess.call(['sh', './seg_iast.sh'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    #subprocess.call(['sh', './seg_iast.sh'])
     return 0;
     
 
@@ -154,13 +156,9 @@ def try_folder_path(temp, mix_combi, path = "../../automated_output"):
             str1 += str("%s" %(mix_combi[i]))
         else:
             str1 += str("%s-" %(mix_combi[i]))
-    if os.path.exists(path + "/%d_molecules/%dK_temperature" % (no_compos, temp)) == True:
-        pass
-    else:
+    if os.path.exists(path + "/%d_molecules/%dK_temperature" % (no_compos, temp)) == False:
         os.makedirs(path + "/%d_molecules/%dK_temperature" % (no_compos, temp))
-    if os.path.exists(path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1)) == True:
-        pass
-    else:
+    if os.path.exists(path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1)) == False:
         os.makedirs(path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1))
     return path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1)
 
@@ -169,12 +167,13 @@ def move_segiast_dotf_output(output_path, gas_frac):
     no_compos = gas_frac.shape[0]
     for i in range(0, no_compos):
         if i == no_compos-1:
-            str1 += str("%f" %(gas_frac[i]))
+            str1 += str("%.2f" %(gas_frac[i]))
         else:
-            str1 += str("%f-" %(gas_frac[i]))
+            str1 += str("%.2f-" %(gas_frac[i]))
     os.rename('../fortran/fort.25', "%s/%s.txt" %(output_path, str1))
 
 def seg_iast_one_combi_loop(temp, p0_lookup, mix_combi, gas_frac):
+    "Computes seg-iast of all possbile permutation of a given combination of molecules."
     no_gas_iter = gas_frac.shape[0]
     for i in range(0, no_gas_iter):
         write_testiast_dotf(temp, mix_combi, p0_lookup, gas_frac[i])
@@ -184,27 +183,38 @@ def seg_iast_one_combi_loop(temp, p0_lookup, mix_combi, gas_frac):
     return 0;
 
 def automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac):
+    "Computes seg-iast all possbile combinations of [n] molecules."
     no_mol_iter = np.shape(mix_combi)
     for i in range(0, no_mol_iter[0]):
         seg_iast_one_combi_loop(temp, p0_lookup, mix_combi[i], gas_frac)
-        #print(mix_combi[i])
     return 0;
 
 def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
+    "Computes the seg-iast of all temperatures of all possible combinations of [n] moletules"
     for temp in temp_list:
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
     return 0;
 
+def automatic_no_mols_seg_iast(temp, p0_lookup,names, max_no_mols = 5, low_no_frac = 10, high_no_frac = 20):
+    mols = np.arange(2, max_no_mols +1)
+    for no_molecules in mols:
+        if no_molecules > 3:
+            no_gas_fractions = high_no_frac
+        else:
+            no_gas_fractions = low_no_frac
+        mix_combi = get_mix_combinations(no_molecules, names)
+        gas_frac = get_frac_permutations(int(no_molecules), int(no_gas_fractions))
+        automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 def main():
-    temp = 400
-    no_molecules = 5
-    no_gas_fractions = 20
-
+    temp = 500
+    #no_molecules = 6
+    #no_gas_fractions = 25
+    
     p0_lookup, names = p0_dict(temp)
-    mix_combi = get_mix_combinations(no_molecules, names)
-    gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
-
-    automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
+    automatic_no_mols_seg_iast(temp, p0_lookup, names)
+    #mix_combi = get_mix_combinations(no_molecules, names)
+    #gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
+    #automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 
 
 if __name__ == "__main__":

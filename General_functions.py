@@ -73,15 +73,17 @@ def data_gathering(path_to_output):
                     print("ERROR !!!, please check " + file + " \n")
     return data
 
-def RASPA_database(columns,chemstructure=ML_database()):
-    path_to_out='MachineLearning/Outputs_RASPA'
-    paths = glob.glob(path_to_out + "/*.txt")
-    database=np.array(len(paths))
-    for i,file in enumerate(paths):
-        molecule = file.split('/')[-1].split('-')[0]
-        selfie=chemstructure[molecule]
-        data=np.genfromtxt(file,delimiter=',',usecols=columns,skip_header=1)
-        
+def RASPA_database():
+    path_to_out="Raspa/outputs/**/*.txt"
+    new_path="MachineLearning/Outputs_RASPA/"
+    
+    paths = glob.glob(path_to_out)
+    # database=np.array(len(paths))
+    for file in paths:
+        print(file)
+        # molecule = file.split('/')[-1].split('-')[0]
+        data=np.genfromtxt(file,delimiter=',',usecols=(0,3),skip_header=1)
+
         #Removing pressures that are too high
         data=np.delete(data,obj=np.where(data[:,0]>1e8),axis=0)
         
@@ -89,15 +91,14 @@ def RASPA_database(columns,chemstructure=ML_database()):
         temp=int( file.split('/')[-1].split("out")[0][-3:] )
         data=np.insert(data,obj=1,axis=1,values=temp*np.ones(np.shape(data)[0]))
         
-        #adding selfie
-        data=np.insert(data,obj=0,axis=0,values=selfie)
-        database[i]=data
-    return database
-
+        fname=file.split('/')[-1]
+        np.savetxt(new_path+fname, data,header='pressure,temperature,molkg',delimiter=',')
+        
 def IAST_database():
     path_to_out='MachineLearning/Outputs_IAST'
     paths = glob.glob(path_to_out + "/*.txt")
     
+    new_path="MachineLearning/Outputs_IAST/"
     for file in paths:
         #Removing pressures that are too high
         data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
@@ -113,7 +114,9 @@ def IAST_database():
         data=np.insert(data,obj=1,axis=1,values=temp*length)
         data=np.insert(data,obj=2,axis=1,values=f1*length)
         data=np.insert(data,obj=3,axis=1,values=f2*length)
-        np.savetxt(file, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
+        
+        fname=file.split('/')[-1]
+        np.savetxt(new_path+fname, data,header='pressure,temperature,f1,f2,molkg1,molkg2',delimiter=',')
 
 def make_training_database(chemstructure=ML_database()):
     path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
@@ -146,4 +149,5 @@ def make_training_database(chemstructure=ML_database()):
         selfie=f1*selfie1+f2*selfie2
         data=np.hstack((selfie,data))
         data_IAST.append(data)
-    return np.vstack(data_RASPA),np.vstack(data_IAST)
+    return data_RASPA,data_IAST
+
