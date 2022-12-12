@@ -64,7 +64,7 @@ def iterative_DS_Langmuir(df_iso, k1_its, q_its, Double_Side=True):
     qlinspace = np.linspace(0.5, 4, q_its)
     klogspace = np.logspace(0, -12, k1_its)
     molkg, pressure = df_iso["molkg"], df_iso["pressure"]
-    p0_array = np.zeros([4, k1_its * k1_its * q_its * q_its])
+    p0_array = np.zeros([4, k1_its  * q_its * q_its])
     m = 0 #helper variable
     if Double_Side == True:
         k2logspace = klogspace

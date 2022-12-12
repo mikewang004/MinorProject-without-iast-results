@@ -28,3 +28,5 @@ def get_plot():
         #plt.loglog(data2[:, 0], data2[:, i], ".", label="%d-th molecule" %(i))
     plt.legend()
     plt.show()
+
+get_plot()
