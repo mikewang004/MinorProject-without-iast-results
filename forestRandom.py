@@ -229,7 +229,7 @@ def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
     return np.vstack(data_RASPA),np.vstack(data_IAST)
 
 chemstructure=ML_database()
-max_amount_mols = 4
+max_amount_mols = 3
 data_set_raspa, data_set_iast = make_training_database_ver2(max_amount_mols)
 print(data_set_iast)
 # sys.exit(0)
