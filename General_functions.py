@@ -317,3 +317,4 @@ def make_IAST_database_Wessel_version(chemstructure,n_molecule_combinations, onl
     """stacking vertically so that it becomes a 2D array instead of 3D array"""
     total_data = np.vstack(total_data) 
     return total_data[:,:(Length_inputvector+2)], total_data[:,Length_inputvector+2:]
+
