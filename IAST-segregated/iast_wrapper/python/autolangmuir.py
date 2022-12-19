@@ -13,8 +13,7 @@ import pandas as df
 
 
 plotpath = "../../langmuir_pure_plots/"
-temp = 300
-def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
+def load_raspa(temp, path = "../../../Raspa/outputs"):
     mol_names = []
     mol_csvs = []
     for root, dir, files in os.walk(path):
@@ -22,8 +21,7 @@ def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
             if str(temp) in names:
                 mol_names.append(names.partition("-")[0])
                 #print(names)
-                mol_csvs.append(root + "/" + names)
-    print(mol_csvs)                
+                mol_csvs.append(root + "/" + names)               
     return mol_csvs, mol_names
 
 
@@ -48,7 +46,7 @@ def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7):
     qlinspace = np.linspace(0.5, 4, q_its)
     klogspace = np.logspace(0, -12, k1_its)
     molkg, pressure = df_iso["molkg"], df_iso["pressure"]
-    p0_array = np.zeros([4, k1_its * k1_its * q_its * q_its])
+    p0_array = np.zeros([4, k1_its * q_its * q_its])
     m = 0 #helper variable
     print("Started for-loop.")
     
@@ -64,7 +62,10 @@ def autoselect_p0_DS_Langmuir(data, name):
     "Selects data based upon two criteria: 1. no values should be smaller than 0;"
     "2. q1 should be between 0.6 and 0.8."
     "Returns the average p0 value."
-    data = data[:, data.min(axis=0)>=10e-20] 
+    data = data[:, data.min(axis=0)>=10e-25] 
+    if data[:, data[1, :] > data[3, :]].size == 0:
+        data[[1, 3]] = data[[3, 1]]
+        data[[0, 2]] = data[[2, 0]]
     data = data[:, data[1, :] > data[3, :]]
     data = np.delete(data, np.isnan(data).any(axis=0), axis=1)
     return np.average(data, axis=1)
@@ -81,31 +82,56 @@ def save_p0_plot(mol1iso, sel_data, input1):
     plt.savefig(plotpath + "%s-%d_plot" %(input1, temp))
     plt.close()
 
-def auto_fit_plot_Langmuir(temp, input_name = None, input_path = None):
+def check_if_iso_exists(temp, mol_paths, mol_names, path = "new_p0/"):
+    try:
+        with open(path + "p0_values-%d.txt" %(temp), "r") as file:
+            for line in file:
+                for s in mol_names:
+                    if s in line:
+                        del mol_paths[mol_names.index(s)]
+                        mol_names.remove(s)
+        return mol_paths, mol_names
+    except:
+        return mol_paths, mol_names
+
+def auto_fit_plot_Langmuir(temp, calc_all = False, input_name = None, input_path = None):
     if input_name == None:
         if input_path == None:
             paths, mol_names = load_raspa(temp)
     else:
         paths, mol_names = [input_path], [input_name]
     output = []
+    if calc_all == False:
+        paths, mol_names = check_if_iso_exists(temp, paths, mol_names)
     for i in range(0, len(mol_names)):
-    #for i in range(0, 2):
         mol_1_iso, name = df.read_csv(paths[i]), mol_names[i]
         mol1para = return_molkg_pressure(mol_1_iso)
         sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso), name)
         output.append(sel_data)
         save_p0_plot(mol_1_iso, sel_data, name)
-        #print("Finised molecule %s." %name)
     output1 = np.zeros(4)
-    with open('new_p0/p0_values-%d.txt' %temp, "w") as f:
+    if calc_all == False:
+        if os.path.exists('new_p0/p0_values-%d.txt') == True:
+            p0_append_write = "a"
+        else:
+            p0_append_write = "w"
+    else:
+        p0_append_write = "w"
+    with open('new_p0/p0_values-%d.txt' %temp, p0_append_write) as f:
         for i in range(0, len(output)):
             output1 = np.array( output[i])
             f.write("%s \t %s \n" %(mol_names[i], output1))
     return 0;
-name = "22mC5"
-paths = "../../../Raspa/nieuwe_outputs/%s/%s-%dout.txt" %(name, name, temp)
+
+
+def input_wrapper_langmuir():
+    auto_fit_plot_Langmuir(input("Please input a temperature"))
+#name = "22mC5"
+#paths = "../../../Raspa/%s/%s-%dout.txt" %(name, name, temp)
 def main():
+    temp = 600
     auto_fit_plot_Langmuir(temp)
+    input_wrapper_langmuir()
 
 if __name__ == "__main__":
     main()  

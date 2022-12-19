@@ -5,23 +5,18 @@ Created on Sun Nov 27 16:44:10 2022
 @author: Wesse
 """
 
-import sklearn as sk
-from matplotlib import pyplot as plt
-from General_functions import ML_database, data_gathering, simple_database
-import pandas as pd
+from sklearn.model_selection import train_test_split  
+import tensorflow as tf
+from General_functions import ML_database ,simple_database, make_IAST_database_Wessel_version
 import numpy as np
 
 
-path_to_output = "Raspa/outputs"
-
-#collecting all data
-data = data_gathering(path_to_output)
+#making database of molecules representation
 selfies_database = ML_database()
 easy_database = simple_database()
 
-molecule1 = "C7"
-T1 = 300
+#getting IAST combined with the molecule representaion
+x_data, y_data = make_IAST_database_Wessel_version(easy_database,3)
 
-molecule2 = "23mC5"
-T2 = 400
+#x_train, x_test, y_train, y_test = train_test_split(x_data,y_data,test_size= 0.3)
 
