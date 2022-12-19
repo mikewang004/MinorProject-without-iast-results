@@ -64,7 +64,7 @@ def iterative_DS_Langmuir(df_iso, k1_its, q_its, Double_Side=True):
     qlinspace = np.linspace(0.5, 4, q_its)
     klogspace = np.logspace(0, -12, k1_its)
     molkg, pressure = df_iso["molkg"], df_iso["pressure"]
-    p0_array = np.zeros([4, k1_its * k1_its * q_its * q_its])
+    p0_array = np.zeros([4, k1_its  * q_its * q_its])
     m = 0 #helper variable
     if Double_Side == True:
         k2logspace = klogspace
@@ -98,10 +98,10 @@ def get_name_from_path(path):
 
 input_path = "../../../Raspa/outputs/"
 input_path_nieuw = "../../../Raspa/nieuwe_outputs/"
-temp = 400
+temp = 300
 exp_p0 = [1.0e-7, 0.6, 1.0e-1, 0.7]
 eps1, eps2 = 10e2, 0.1
-input1 = "22mC5"
+input1 = "33mC5"
 mol_1_path = input_path_nieuw + "%s/%s-%dout.txt" %(input1, input1, temp)
 #input2 = "3mC6"
 #mol_2_path = input_path_nieuw + "%s/%s-%dout.txt" %(input2, input2, temp)

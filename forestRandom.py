@@ -158,22 +158,22 @@ def make_training_database(chemstructure=ML_database()):
     return np.vstack(data_RASPA),np.vstack(data_IAST)
 
 def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
-    path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
+    # path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
     path_IAST=glob.glob('IAST-segregated/automated_output/*')
     
-    data_RASPA=[]
+    # data_RASPA=[]
     data_IAST=[]
     # print(path_IAST)
     # sys.exit(0)
     
-    for file in path_RASPA:
-        file = file.replace("\\", "/") #comment this line if you use linux
-        molecule = file.split('/')[-1].split('-')[0]
+    # for file in path_RASPA:
+    #     file = file.replace("\\", "/") #comment this line if you use linux
+    #     molecule = file.split('/')[-1].split('-')[0]
 
-        data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
-        selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
-        data=np.hstack((selfie,data))
-        data_RASPA.append(data)
+    #     data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+    #     selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
+    #     data=np.hstack((selfie,data))
+    #     data_RASPA.append(data)
     
     for path_amount in path_IAST:
         path_amount = path_amount.replace("\\", "/")
@@ -210,7 +210,8 @@ def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
                         data=np.loadtxt(file,delimiter='   ',skiprows =1, usecols=(range(1,amount_mols+2)))#Pressure, loading m1, loading m2,..., loading mi
                     except:
                         print(f"failed to load file: {file}")
-                        continue
+                        print(mols_mix)
+                        break
                     if len(mols)<max_amount_mols:
                         # print(data.shape)
                         # print(np.zeros((max_amount_mols - len(mols), len(data))).shape)
@@ -226,25 +227,271 @@ def make_training_database_ver2(max_amount_mols, chemstructure=ML_database()):
                     temp_arr = np.full((len(data), 1), temp) 
                     data=np.hstack((selfie,temp_arr, data))
                     data_IAST.append(data)
-    return np.vstack(data_RASPA),np.vstack(data_IAST)
+    return np.vstack(data_IAST)
 
-chemstructure=ML_database()
-max_amount_mols = 4
-data_set_raspa, data_set_iast = make_training_database_ver2(max_amount_mols)
-print(data_set_iast)
-# sys.exit(0)
+
+def make_training_database_ver3(wanted_amount_mols, chemstructure=ML_database()):
+    # path_RASPA=glob.glob('MachineLearning/Outputs_RASPA/*.txt')
+    path_IAST=glob.glob('IAST-segregated/automated_output/*')
     
-x_vals=data_set_iast[:,:-max_amount_mols]
-y_vals=data_set_iast[:,(len(data_set_iast[0]))-max_amount_mols:]
+    # data_RASPA=[]
+    data_IAST=[]
+    # print(path_IAST)
+    # sys.exit(0)
+    
+    # for file in path_RASPA:
+    #     file = file.replace("\\", "/") #comment this line if you use linux
+    #     molecule = file.split('/')[-1].split('-')[0]
 
-x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals ,test_size= 0.1, random_state=0)  
+    #     data = np.loadtxt(file,skiprows=1,delimiter=',',usecols=(0,1,-1))  
+    #     selfie=np.repeat(chemstructure[molecule], data.shape[0]).reshape(52,data.shape[0]).T
+    #     data=np.hstack((selfie,data))
+    #     data_RASPA.append(data)
+    
+    for path_amount in path_IAST:
+        path_amount = path_amount.replace("\\", "/")
+        # print(path_amount)
+        amount_mols = int(path_amount.split('/')[-1].split('_')[0])
+        print(amount_mols)
+        
+        if amount_mols!=wanted_amount_mols:
+            continue
+        print("test")
+        path_temps = glob.glob(path_amount + "/*")
+        for folder in path_temps:
+            folder = folder.replace("\\", "/") #comment this line if you use linux
+            # print(folder)
+            # print(folder.split('/')[-1].split("K")[0])
+            temp = float(folder.split('/')[-1].split("K")[0])
+            # print(folder + "/*.txt")
+            molc_folder = glob.glob(folder + "/*")
+            
+            # print(molc_folder)
+            for mols_mix in molc_folder:
+                mols_mix = mols_mix.replace("\\", "/")
+                # print(mols_mix)
+                # print(type(amount_mols))
+                mols = mols_mix.split('/')[-1].split('-')
+                # print(molc_folder)
+                path_fracs = glob.glob(mols_mix + "/*.txt")
+                for file in path_fracs:
+                    file = file.replace("\\", "/")
+                    fracs = file.split('/')[-1].split('.txt')[0].split("-")
+                    # print(fracs)
+                    fracs = np.array(fracs, dtype=float)
+                    # print(path_fracs)
+                    # print(fracs)
+                    try:
+                        data=np.loadtxt(file,delimiter='   ',skiprows =1, usecols=(range(1,amount_mols+2)))#Pressure, loading m1, loading m2,..., loading mi
+                    except:
+                        print(f"failed to load file: {file}")
+                        print(mols_mix)
+                        break
+                    # if len(mols)<wanted_amount_mols:
+                    #     # print(data.shape)
+                    #     # print(np.zeros((max_amount_mols - len(mols), len(data))).shape)
+                    #     data = np.append(data, np.zeros((len(data),max_amount_mols - len(mols))), axis =1)
+                    
+                    
+                    # print(data.shape)
+                    selfie = 0
+                    for i, mol in enumerate(mols):
+                        selfie += fracs[i] * np.repeat(chemstructure[mol], data.shape[0]).reshape(52,data.shape[0]).T
+                    # print(selfie.shape)
+                    # print(data.shape)
+                    temp_arr = np.full((len(data), 1), temp) 
+                    # try:
+                    #     selfie1 = np.repeat(chemstructure[mols[0]], data.shape[0]).reshape(52,data.shape[0]).T
+                    #     selfie2 = np.repeat(chemstructure[mols[1]], data.shape[0]).reshape(52,data.shape[0]).T
+                    #     data=np.hstack((np.full((len(data), 1), fracs[0]), selfie1,np.full((len(data), 1), fracs[1]), selfie2,temp_arr, data))
+                    # except:
+                    selfie1 = np.repeat(chemstructure[mols[0]], data.shape[0]).reshape(52,data.shape[0]).T
+                    selfie2 = np.repeat(chemstructure[mols[1]], data.shape[0]).reshape(52,data.shape[0]).T
+                    selfie3 = np.repeat(chemstructure[mols[2]], data.shape[0]).reshape(52,data.shape[0]).T
+                    data=np.hstack((np.full((len(data), 1), fracs[0]), selfie1,np.full((len(data), 1), fracs[1]),selfie2, np.full((len(data), 1), fracs[2]),selfie3, temp_arr, data))
+                    
+                    data_IAST.append(data)
+    return np.vstack(data_IAST)
+
+def make_training_database_ver4(wanted_amount_mols, chemstructure=ML_database()):
+    path_IAST=glob.glob('IAST-segregated/automated_output/*')
+    data_IAST=[]
+    
+    for path_amount in path_IAST:
+        path_amount = path_amount.replace("\\", "/")
+        amount_mols = int(path_amount.split('/')[-1].split('_')[0])
+        
+        if amount_mols!=wanted_amount_mols:
+            continue
+
+        path_temps = glob.glob(path_amount + "/*")
+        for folder in path_temps:
+            folder = folder.replace("\\", "/") #comment this line if you use linux
+            
+            temp = float(folder.split('/')[-1].split("K")[0])
+            
+            molc_folder = glob.glob(folder + "/*")
+            for mols_mix in molc_folder:
+                mols_mix = mols_mix.replace("\\", "/")
+
+                mols = mols_mix.split('/')[-1].split('-')
+                path_fracs = glob.glob(mols_mix + "/*.txt")
+                for file in path_fracs:
+                    file = file.replace("\\", "/")
+                    fracs = file.split('/')[-1].split('.txt')[0].split("-")
+                    fracs = np.array(fracs, dtype=float)
+                    try:
+                        data=np.loadtxt(file,delimiter='   ',skiprows =1, usecols=(range(1,amount_mols+2)))#Pressure, loading m1, loading m2,..., loading mi
+                    except:
+                        print(f"failed to load file: {file}")
+                        continue
+
+                    temp_arr = np.full((len(data), 1), temp) 
+ 
+                    for it in range(amount_mols):
+                        frac =  np.full((len(data), 1), fracs[it])
+                        selfie = np.repeat(chemstructure[mols[it]], data.shape[0]).reshape(52,data.shape[0]).T
+                        if it == 0:
+                            new_data = np.hstack((frac, selfie))
+                        else:
+                            new_data = np.hstack((new_data, frac, selfie))
+
+                    new_data = np.hstack((new_data,temp_arr,data))
+                    data_IAST.append(new_data)
+    return np.vstack(data_IAST)
+
+# def make_IAST_database(nummol, chemstructure=ML_database):
+#     """
+#     Enter the number of molecules you want to mix (nummol). The function will
+#     in default use the ML_database for the chemical structure of the molecules, 
+#     which is a dictionary containing all selfie structures of the used 
+#     molecules.
+#     The function will return the x and y values of the IAST-data:
+#      * The variable x_vals is an 2D array which contains of multiple arrays 
+#        filled with the following: fraction of mixture molecule
+#        1, selfies code molecule 1, ..., fraction of mixture molecule nummol, 
+#        selfies code molecule nummol, the pressure, the temprature. In each 
+#        array (inside x_vals) is either the pressure or temprature is varied.
+#      * The variable y_vals contains the following: loading of molecule 1, ...,
+#        loading of molecule nummol. 
+       
+#     With the return values of this function you can create a train and test
+#     data set for your machine learning algorithm, using the following code snippet:
+        
+#     x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals,
+#                                             test_size= 0.1, random_state=0)  
+#     """
+#     path_IAST=glob.glob(f'IAST-segregated/automated_output/{nummol}_molecules/**/**/*.txt')
+    
+#     chemstructure=ML_database()
+#     data_IAST =[]
+#     for file in path_IAST: 
+#         file = file.replace("\\", "/") #comment line if you use linux
+#         folders=file.split('/')
+#         temp=int( folders[3][:3] ) 
+        
+#         data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float)
+#         data=np.insert(data,obj=1,axis=1,values=temp)
+        
+#         for it in range(nummol):
+#             frac =  np.full((len(data), 1), float(folders[-1].split('-')[it].split(".txt")[0]))
+#             selfie = np.repeat(chemstructure[folders[4].split("-")[it]], data.shape[0]).reshape(52,data.shape[0]).T
+#             if it == 0:
+#                 frac_selfie = np.hstack((frac, selfie))
+#             else:
+#                 frac_selfie = np.hstack((frac_selfie, frac, selfie))
+
+#         data=np.hstack((frac_selfie,data))
+#         data_IAST.append(data)
+    
+#     data_IAST = np.vstack(data_IAST)
+#     x_vals=data_IAST[:,:-nummol]
+#     y_vals=data_IAST[:,(len(data_IAST[0]))-nummol:]    
+#     return x_vals, y_vals
+
+def make_IAST_database_ver2(nummol, chemstructure=ML_database):
+    """
+    Enter the number of molecules you want to mix (nummol). The function will
+    in default use the ML_database for the chemical structure of the molecules, 
+    which is a dictionary containing all selfie structures of the used 
+    molecules.
+    The function will return the x and y values of the IAST-data:
+     * The variable x_vals is an 2D array which contains of multiple arrays 
+       filled with the following: fraction of mixture molecule
+       1, selfies code molecule 1, ..., fraction of mixture molecule nummol, 
+       selfies code molecule nummol, the pressure, the temprature. In each 
+       array (inside x_vals) is either the pressure or temprature is varied.
+     * The variable y_vals contains the following: loading of molecule 1, ...,
+       loading of molecule nummol. 
+       
+    With the return values of this function you can create a train and test
+    data set for your machine learning algorithm, using the following code 
+    snippet:
+        
+    x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals,
+                                            test_size= 0.1, random_state=0)  
+    """
+    #create list of all paths to the data files of the mixture of nummol molecules:
+    path_IAST=glob.glob(f'IAST-segregated/automated_output/{nummol}_molecules/**/**/*.txt')
+    
+    chemstructure=ML_database()
+    data_IAST =[]
+    for file in path_IAST: 
+        file = file.replace("\\", "/") #comment this line if you use linux
+        folders=file.split('/') #creates a list of all folders in the directory leading to the file
+        temp=int( folders[3][:3] ) #extracts the temperature of the mixture from the folders list
+        
+        #load data and insert the temperature at the end of each row of data:
+        data=np.genfromtxt(file,delimiter='    ',skip_header=1,dtype=float) 
+        data=np.insert(data,obj=1,axis=1,values=temp)
+        
+        for molnum in range(nummol):
+            #create an array of the fraction (frac) and selfie (selfie) of 
+            #molecule molnum and add it to the array frac_selfie, where the two
+            #are combined. After the for loop the array frac_selfie contains
+            #of rows filled with the fraction of molecule 1, selfie of molecule
+            #1, ..., fraction of molecule nummol, selfie of nummol. frac_selfie
+            #contains of the same amount of columns as the data array and each
+            #row is identical.
+            frac =  np.full((len(data), 1), float(folders[-1].split('-')[molnum].split(".txt")[0]))
+            selfie = np.repeat(chemstructure[folders[4].split("-")[molnum]], data.shape[0]).reshape(52,data.shape[0]).T
+            if molnum == 0:
+                frac_selfie = np.hstack((frac, selfie))
+            else:
+                frac_selfie = np.hstack((frac_selfie, frac, selfie))
+        
+        #combine the frac_selfie array and the data array into one array. And 
+        #append the combined array to data_IAST, which will gather all combined 
+        #arrays:
+        data=np.hstack((frac_selfie,data)) 
+        data_IAST.append(data)
+    
+    data_IAST = np.vstack(data_IAST) #reorder the array
+    
+    #seperate the input values (x_vals) and output values (y_vals) from the 
+    #combined data set (data_IAST):
+    x_vals=data_IAST[:,:-nummol] 
+    y_vals=data_IAST[:,(len(data_IAST[0]))-nummol:]    
+    return x_vals, y_vals
+
+wanted_amount_mols = 2
+x_vals, y_vals = make_IAST_database_ver2(wanted_amount_mols)
+    
+# x_vals=data_set_iast[:,:-wanted_amount_mols]
+# y_vals=data_set_iast[:,(len(data_set_iast[0]))-wanted_amount_mols:]
+
+x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals,
+                                        test_size=0.1, random_state=0)  
 
 regr = RandomForestRegressor(random_state=0)
 regr.fit(x_train, y_train)
 
 y_pred=regr.predict(x_test) 
 
-rel_err=np.abs(y_pred-y_test)/y_test
+rel_err=np.abs(y_pred-y_test)#/y_test
+
+
+
 rel_err = rel_err[:,0]
 plt.figure()
 plt.title("Performance Decision Tree (VERSION 2)")
@@ -276,56 +523,65 @@ plt.ylabel("Relative error of predicted point wrt to known point")
 plt.legend()
 plt.show()
 
+plt.figure()
+plt.title("Performance Decision Tree (VERSION 3),\nusing mix of three molecules")
+plt.scatter(y_test, y_pred)
+# plt.xscale("log")
+# plt.yscale("log")
+plt.xlabel("True loading (from IAST)")
+plt.ylabel("Predicted loading (from Desicion Tree)")
+plt.show()
+
 rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
 rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
 mean_rel_err = np.mean(rel_err)
 print(mean_rel_err)
 
 """Version 1, don't change is backup"""
-data_set_raspa, data_set_iast = make_training_database()
+# data_set_raspa, data_set_iast = make_training_database()
     
-x_vals=data_set_iast[:,:(len(data_set_iast[0]))-2]
-y_vals=data_set_iast[:,(len(data_set_iast[0]))-2:]
+# x_vals=data_set_iast[:,:(len(data_set_iast[0]))-2]
+# y_vals=data_set_iast[:,(len(data_set_iast[0]))-2:]
 
 
-x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals ,test_size= 0.1, random_state=0)  
+# x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals ,test_size= 0.1, random_state=0)  
 
-regr = RandomForestRegressor(random_state=0)
-regr.fit(x_train, y_train)
+# regr = RandomForestRegressor(random_state=0)
+# regr.fit(x_train, y_train)
 
-y_pred=regr.predict(x_test) 
+# y_pred=regr.predict(x_test) 
 
-rel_err=np.abs(y_pred-y_test)/y_test
-rel_err = rel_err[:,0]
-plt.figure()
-plt.title("Performance Decision Tree (VERSION 1)")
-plt.scatter(range(len(rel_err)), rel_err)
-plt.xlabel("Index of array rel_err")
-plt.ylabel("Relative error of predicted point wrt to known point")
-plt.show()
+# rel_err=np.abs(y_pred-y_test)/y_test
+# rel_err = rel_err[:,0]
+# plt.figure()
+# plt.title("Performance Decision Tree (VERSION 1)")
+# plt.scatter(range(len(rel_err)), rel_err)
+# plt.xlabel("Index of array rel_err")
+# plt.ylabel("Relative error of predicted point wrt to known point")
+# plt.show()
 
-plt.figure()
-plt.title("Performance Decision Tree (VERSION 1), zoomed in plot")
-plt.scatter(range(len(rel_err)), rel_err)
-plt.ylim(0,0.25)
-plt.xlabel("Index of array rel_err")
-plt.ylabel("Relative error of predicted point wrt to known point")
-plt.show()
+# plt.figure()
+# plt.title("Performance Decision Tree (VERSION 1), zoomed in plot")
+# plt.scatter(range(len(rel_err)), rel_err)
+# plt.ylim(0,0.25)
+# plt.xlabel("Index of array rel_err")
+# plt.ylabel("Relative error of predicted point wrt to known point")
+# plt.show()
 
-rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
-rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
-mean_rel_err = np.mean(rel_err)
-print(mean_rel_err)
+# rel_err = rel_err[~np.isnan(rel_err)] #to remove nan's
+# rel_err = rel_err[~np.isinf(rel_err)] #to remove inf's
+# mean_rel_err = np.mean(rel_err)
+# print(mean_rel_err)
 
-plt.figure()
-plt.title("Performance Decision Tree (VERSION 1), logaritmic plot")
-plt.scatter(range(len(rel_err)), rel_err, label="Relative error point i")
-plt.hlines(mean_rel_err, xmin = 0, xmax = len(rel_err), color="red", label="Mean relative error")
-plt.yscale("log")
-plt.xlabel("Index of array rel_err")
-plt.ylabel("Relative error of predicted point wrt to known point")
-plt.legend()
-plt.show()
+# plt.figure()
+# plt.title("Performance Decision Tree (VERSION 1), logaritmic plot")
+# plt.scatter(range(len(rel_err)), rel_err, label="Relative error point i")
+# plt.hlines(mean_rel_err, xmin = 0, xmax = len(rel_err), color="red", label="Mean relative error")
+# plt.yscale("log")
+# plt.xlabel("Index of array rel_err")
+# plt.ylabel("Relative error of predicted point wrt to known point")
+# plt.legend()
+# plt.show()
 
 
 
