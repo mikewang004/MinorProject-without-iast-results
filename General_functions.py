@@ -198,7 +198,6 @@ def make_IAST_database_ver2(nummol, chemstructure=ML_database):
     #create list of all paths to the data files of the mixture of nummol molecules:
     path_IAST=glob.glob(f'IAST-segregated/automated_output/{nummol}_molecules/**/**/*.txt')
     
-    chemstructure=ML_database()
     data_IAST =[]
     for file in path_IAST: 
         file = file.replace("\\", "/") #comment this line if you use linux
@@ -218,7 +217,8 @@ def make_IAST_database_ver2(nummol, chemstructure=ML_database):
             #contains of the same amount of columns as the data array and each
             #row is identical.
             frac =  np.full((len(data), 1), float(folders[-1].split('-')[molnum].split(".txt")[0]))
-            selfie = np.repeat(chemstructure[folders[4].split("-")[molnum]], data.shape[0]).reshape(52,data.shape[0]).T
+            # print(frac)
+            selfie = np.repeat(chemstructure[folders[4].split("-")[molnum]], data.shape[0]).reshape(8,data.shape[0]).T
             if molnum == 0:
                 frac_selfie = np.hstack((frac, selfie))
             else:
