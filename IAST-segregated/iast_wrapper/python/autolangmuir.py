@@ -23,6 +23,14 @@ def load_raspa(temp, path = "../../../Raspa/outputs"):
                 mol_csvs.append(root + "/" + names)               
     return mol_csvs, mol_names
 
+def load_raspa_new(temp, mol_names, mol_csvs, path = "../../../Raspa/ShrinjayOutputs/ConvertedShrinjay"):
+    for root, dir, files in os.walk(path):
+        for names in files:
+            if str(temp) in names:
+                mol_names.append(names.partition("-")[2])
+                mol_csvs.append(root + "/" + names)         
+    return mol_csvs, mol_names
+
 
 def return_molkg_pressure(df_iso):
     return df_iso["molkg"], df_iso["pressure"]
@@ -97,13 +105,16 @@ def auto_fit_plot_Langmuir(temp, calc_all = False, input_name = None, input_path
     if input_name == None:
         if input_path == None:
             paths, mol_names = load_raspa(temp)
+            paths, mol_names = load_raspa_new(temp, paths, mol_names)
     else:
         paths, mol_names = [input_path], [input_name]
     output = []
     if calc_all == False:
         paths, mol_names = check_if_iso_exists(temp, paths, mol_names)
     for i in range(0, len(mol_names)):
-        mol_1_iso, name = df.read_csv(paths[i]), mol_names[i]
+        print(mol_names[i])
+        mol_1_iso = df.read_csv(paths[i])
+        #mol_1_iso, name = df.read_csv(paths[i]), mol_names[i]
         mol1para = return_molkg_pressure(mol_1_iso)
         sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso), name)
         output.append(sel_data)
