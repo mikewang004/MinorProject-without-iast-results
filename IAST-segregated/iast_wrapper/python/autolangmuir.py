@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 import scipy as sp
+import scipy.stats
 import os 
 import subprocess
 import pandas as df
@@ -20,20 +21,31 @@ def load_raspa(temp, path = "../../../Raspa/outputs"):
             if str(temp) in names:
                 mol_names.append(names.partition("-")[0])
                 #print(names)
-                mol_csvs.append(root + "/" + names)               
-    return mol_csvs, mol_names
+                mol_csvs.append(root + "/" + names)         
+    return mol_names, mol_csvs
 
 def load_raspa_new(temp, mol_names, mol_csvs, path = "../../../Raspa/ShrinjayOutputs/ConvertedShrinjay"):
     for root, dir, files in os.walk(path):
         for names in files:
             if str(temp) in names:
                 mol_names.append(names.partition("-")[2])
-                mol_csvs.append(root + "/" + names)         
+                mol_csvs.append(root + "/" + names)     
+    print(mol_csvs)      
     return mol_csvs, mol_names
 
 
 def return_molkg_pressure(df_iso):
-    return df_iso["molkg"], df_iso["pressure"]
+    try:
+        molkg, pressure = df_iso["molkg"], df_iso["pressure"]
+    except:
+        molkg, pressure = df_iso["molkg"], df_iso["# pressure"]
+    try:
+        if pressure.str.contains("C").any():
+            pressure_stripped = pressure.str.rpartition("-")[2]
+            pressure_stripped.name = "pressure"
+            return molkg, pressure_stripped
+    except:
+        return molkg, pressure
 
 def DSLangmuir(ab, k1, qsat1, k2, qsat2):
     k1ab, k2ab = k1 * ab, k2 * ab
@@ -51,8 +63,8 @@ def try_curvefit(DSLangmuir, pressure, molkg, p0, maxfev = 2000):
 def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7): 
     "Generates various p0 starting values, then generates curvefits for all of them"
     qlinspace = np.linspace(0.5, 4, q_its)
-    klogspace = np.logspace(1, -12, k1_its)
-    molkg, pressure = df_iso["molkg"], df_iso["pressure"]
+    klogspace = np.logspace(2, -12, k1_its)
+    molkg, pressure = return_molkg_pressure(df_iso)
     p0_array = np.zeros([4, k1_its * q_its * q_its])
     m = 0 #helper variable
     print("Started for-loop.")
@@ -113,8 +125,8 @@ def auto_fit_plot_Langmuir(temp, calc_all = False, input_name = None, input_path
         paths, mol_names = check_if_iso_exists(temp, paths, mol_names)
     for i in range(0, len(mol_names)):
         print(mol_names[i])
-        mol_1_iso = df.read_csv(paths[i])
-        #mol_1_iso, name = df.read_csv(paths[i]), mol_names[i]
+        #mol_1_iso = df.read_csv(paths[i])
+        mol_1_iso, name = df.read_csv(paths[i]), mol_names[i]
         mol1para = return_molkg_pressure(mol_1_iso)
         sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso), name)
         output.append(sel_data)
@@ -142,6 +154,6 @@ def main():
     temp = 600
     auto_fit_plot_Langmuir(temp, calc_all=True)
     #input_wrapper_langmuir()
-
+    #molkg, pressure = return_molkg_pressure(df.read_csv("/home/mike/Documents/uni/alice/Final_project/MinorProject/Raspa/outputs/3mC5/3mC5-600out.txt"))
 if __name__ == "__main__":
     main()  
