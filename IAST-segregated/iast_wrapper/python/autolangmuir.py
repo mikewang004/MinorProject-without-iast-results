@@ -5,7 +5,6 @@
 import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
-import pyiast
 import scipy as sp
 import os 
 import subprocess

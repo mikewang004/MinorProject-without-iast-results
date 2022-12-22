@@ -11,9 +11,7 @@ def ML_database():
     
     max_len = max(sf.len_selfies(s) for s in selfies_dataset)
     symbols = sf.get_alphabet_from_selfies(selfies_dataset) # creating symbols for each character that is in the database
-    
     symbols.add("[nop]") # this is an padding symbol, otherwise it does not work
-    print(symbols)
     
     vocab_stoi = {symbol: idx for idx, symbol in enumerate(symbols)} #giving idx to each symbol
     
@@ -32,16 +30,16 @@ def ML_database():
 
 def simple_database():
     database = {}
-    """array [c atoms, number of branches, location branch1, length branch1, location branch2 , length branch 2,....]""" 
-    database["C7"] = np.array([7,0,0,0,0,0,0,0])
-    database["2mC6"] = np.array([7,1,2,1,0,0,0,0])
-    database["3mC6"] = np.array([7,1,3,1,0,0,0,0])
-    database['22mC5'] = np.array([7,2,2,1,2,1,0,0])
-    database["23mC5"] = np.array([7,2,2,1,3,1,0,0])
-    database['24mC5'] = np.array([7,2,2,1,4,2,0,0])
-    database['33mC5'] = np.array([7,2,3,1,3,1,0,0])
-    database["3eC5"] = np.array([7,1,3,2,0,0,0,0])
-    database['223mC4'] = np.array([7,3,2,1,2,1,3,1])
+    # array [c atomen, hoeveel braches, hoeveel c atomen in branches]
+    database["C7"] = np.array([7,0,0])
+    database["2mC6"] = np.array([7,1,1])
+    database["3mC6"] = np.array([7,1,1])
+    database['22mC5'] = np.array([7,2,1])
+    database["23mC5"] = np.array([7,2,1])
+    database['24mC5'] = np.array([7,2,1])
+    database['33mC5'] = np.array([7,2,1])
+    database["3eC5"] = np.array([7,1,2])
+    database['223mC4'] = np.array([7,3,1])
     
     return database
 
@@ -198,6 +196,7 @@ def make_IAST_database_ver2(nummol, chemstructure=ML_database):
     #create list of all paths to the data files of the mixture of nummol molecules:
     path_IAST=glob.glob(f'IAST-segregated/automated_output/{nummol}_molecules/**/**/*.txt')
     
+    chemstructure=ML_database()
     data_IAST =[]
     for file in path_IAST: 
         file = file.replace("\\", "/") #comment this line if you use linux
@@ -217,8 +216,7 @@ def make_IAST_database_ver2(nummol, chemstructure=ML_database):
             #contains of the same amount of columns as the data array and each
             #row is identical.
             frac =  np.full((len(data), 1), float(folders[-1].split('-')[molnum].split(".txt")[0]))
-            # print(frac)
-            selfie = np.repeat(chemstructure[folders[4].split("-")[molnum]], data.shape[0]).reshape(8,data.shape[0]).T
+            selfie = np.repeat(chemstructure[folders[4].split("-")[molnum]], data.shape[0]).reshape(52,data.shape[0]).T
             if molnum == 0:
                 frac_selfie = np.hstack((frac, selfie))
             else:
