@@ -44,7 +44,7 @@ def try_curvefit(DSLangmuir, pressure, molkg, p0, maxfev = 2000):
 def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7): 
     "Generates various p0 starting values, then generates curvefits for all of them"
     qlinspace = np.linspace(0.5, 4, q_its)
-    klogspace = np.logspace(0, -12, k1_its)
+    klogspace = np.logspace(1, -12, k1_its)
     molkg, pressure = df_iso["molkg"], df_iso["pressure"]
     p0_array = np.zeros([4, k1_its * q_its * q_its])
     m = 0 #helper variable
@@ -70,7 +70,7 @@ def autoselect_p0_DS_Langmuir(data, name):
     data = np.delete(data, np.isnan(data).any(axis=0), axis=1)
     return np.average(data, axis=1)
 
-def save_p0_plot(mol1iso, sel_data, input1):
+def save_p0_plot(mol1iso, temp, sel_data, input1):
     plt.figure()
     mol1para = return_molkg_pressure(mol1iso)
     plt.loglog(mol1para[1], DSLangmuir(mol1para[1], sel_data[0], sel_data[1], sel_data[2], sel_data[3]), "r.", label=input1 + ", DS-Langmuir fit")
@@ -108,7 +108,7 @@ def auto_fit_plot_Langmuir(temp, calc_all = False, input_name = None, input_path
         mol1para = return_molkg_pressure(mol_1_iso)
         sel_data = autoselect_p0_DS_Langmuir(iterative_DS_Langmuir(mol_1_iso), name)
         output.append(sel_data)
-        save_p0_plot(mol_1_iso, sel_data, name)
+        save_p0_plot(mol_1_iso, temp, sel_data, name)
     output1 = np.zeros(4)
     if calc_all == False:
         if os.path.exists('new_p0/p0_values-%d.txt') == True:
@@ -130,8 +130,8 @@ def input_wrapper_langmuir():
 #paths = "../../../Raspa/%s/%s-%dout.txt" %(name, name, temp)
 def main():
     temp = 600
-    auto_fit_plot_Langmuir(temp)
-    input_wrapper_langmuir()
+    auto_fit_plot_Langmuir(temp, calc_all=True)
+    #input_wrapper_langmuir()
 
 if __name__ == "__main__":
     main()  
