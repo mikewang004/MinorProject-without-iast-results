@@ -1,0 +1,14 @@
+#!/bin/bash
+
+
+for dir in */
+do
+        cd $dir
+        for file in *out*
+        do
+                molec=$(echo $file | sed 's/out.txt//g')
+#               echo $molec
+                sed -i "s/${molec}-//g" $file
+        done
+        cd ..
+done

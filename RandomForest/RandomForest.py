@@ -66,6 +66,7 @@ def Performance(amount_mols, rf_model, x_train, x_test, y_train, y_test):
 
 
 amount_mols = 4
+from sklearn.neural_network import MLPRegressor
 
 x_vals, y_vals = make_IAST_database_ver2(amount_mols, simple_database())
 x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals,
@@ -109,10 +110,11 @@ x_train, x_test, y_train, y_test= train_test_split(x_vals, y_vals,
 # dump(regr, 'rf_4mols_mix.joblib') 
 
 start = time.time()
-regr = RandomForestRegressor(n_estimators=100, random_state=0,n_jobs=-1)#max_samples,n_jobs=-1
+regr = MLPRegressor(random_state=0)
+# regr = RandomForestRegressor(n_estimators=100, random_state=0,n_jobs=-1)#max_samples,n_jobs=-1
 regr.fit(x_train, y_train)
 end = time.time()
+print(end-start)
 mean_rel_err,std_rel_err,mean_abs_err,std_abs_err = Performance(amount_mols, regr, x_train, x_test, y_train, y_test)
 
 
-print(end-start)
