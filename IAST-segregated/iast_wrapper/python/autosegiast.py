@@ -22,12 +22,22 @@ def load_raspa(temp, path = "../../../Raspa/nieuwe_outputs"):
                 mol_csvs.append(root + "/" + names)             
     return mol_csvs, mol_names
 
+def load_raspa_new(temp, mol_names, mol_csvs, path = "../../../Raspa/ShrinjayOutputs/ConvertedShrinjay"):
+    for root, dir, files in os.walk(path):
+        for names in files:
+            if str(temp) in names:
+                mol_names.append(names.partition("-")[2])
+                mol_csvs.append(root + "/" + names)     
+    print(mol_csvs)      
+    return mol_csvs, mol_names
+
 def p0_dict(temp, path = None):
     p0_dict = {}
     if path == None:
         with open("new_p0/p0_values-%d.txt" %temp) as file:
             for line in file:
-                name, p0 = line.split("\t")
+                name, p0 = line.split("[")
+                name = name.split()[0]
                 p0 = p0.replace('[', ''); p0 = p0.replace(']', '');
                 p0_dict[name] = np.fromstring(p0, sep=" ")
     return p0_dict, list(p0_dict.keys())
@@ -76,18 +86,18 @@ def prepare_strings_testiast_dotf(no_compos, mix_combi, temp):
     mix_combi = [x.strip(" ") for x in mix_combi]
     str1 = "      write(6,*) "
     str2 = "      write(6,'(2e20.10)') "
-    str3 = """      write(25,'(A)') "  Pressure (Pa)"""
+    str3 = """      write(25,'(A)') "  Pressure (Pa) @ %dK"""%(temp)
     for i in range(0, no_compos):
         if i == (no_compos -1):
             str1 += str("'Ni(%d)   '" %(i+1))
             str2 += str("Ni(%d)" %(i+1))
             #str3 += str("""     %s-%d (mol/kg)" """ %(mix_combi[i], temp))
-            str3 += str(""" %s-%d (mol/kg)" """ %(mix_combi[i], temp))
+            str3 += str(""" %s (mol/kg)" """ %(mix_combi[i]))
         else:
             str1 += str("'Ni(%d)   '," %(i+1))
             str2 += str("Ni(%d)," %(i+1))
             #str3 += str("     %s-%d (mol/kg)" %(mix_combi[i], temp))
-            str3 += str(" %s-%d (mol/kg)" %(mix_combi[i], temp))
+            str3 += str(" %s (mol/kg)" %(mix_combi[i]))
     return str1, str2, str3
 
 def prepare_write_strings_testiast_dotf(no_compos, str1):
@@ -156,6 +166,10 @@ def try_folder_path(temp, mix_combi, path = "../../automated_output"):
             str1 += str("%s" %(mix_combi[i]))
         else:
             str1 += str("%s-" %(mix_combi[i]))
+    if os.path.exists(path) == False:
+        os.makedirs(path)
+    if os.path.exists(path + "/%d_molecules" %(no_compos)) == False:
+        os.makedirs(path + "/%d_molecules" %(no_compos))
     if os.path.exists(path + "/%d_molecules/%dK_temperature" % (no_compos, temp)) == False:
         os.makedirs(path + "/%d_molecules/%dK_temperature" % (no_compos, temp))
     if os.path.exists(path + "/%d_molecules/%dK_temperature/%s" % (no_compos, temp, str1)) == False:
@@ -206,11 +220,12 @@ def automatic_no_mols_seg_iast(temp, p0_lookup,names, max_no_mols = 5, low_no_fr
         gas_frac = get_frac_permutations(int(no_molecules), int(no_gas_fractions))
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 def main():
-    temp = 500
+    temp = 600
     #no_molecules = 6
     #no_gas_fractions = 25
     
     p0_lookup, names = p0_dict(temp)
+    #print(names)
     automatic_no_mols_seg_iast(temp, p0_lookup, names)
     #mix_combi = get_mix_combinations(no_molecules, names)
     #gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
