@@ -14,6 +14,9 @@ import pandas as df
 
 plotpath = "../../langmuir_pure_plots/"
 def load_raspa(temp, path = "../../../Raspa/outputs"):
+    """Loads molecule names and paths from file dir
+    Note: dependent on following filename:
+    [molecule name]-[temperature]_out.txt NB "-" not optional."""
     mol_names = []
     mol_csvs = []
     for root, dir, files in os.walk(path):
@@ -25,6 +28,7 @@ def load_raspa(temp, path = "../../../Raspa/outputs"):
     return mol_names, mol_csvs
 
 def load_raspa_new(temp, mol_names, mol_csvs, path = "../../../Raspa/ShrinjayOutputs/ConvertedShrinjay"):
+    """Loads molecule names and paths from file dir"""
     for root, dir, files in os.walk(path):
         for names in files:
             if str(temp) in names:
@@ -35,17 +39,12 @@ def load_raspa_new(temp, mol_names, mol_csvs, path = "../../../Raspa/ShrinjayOut
 
 
 def return_molkg_pressure(df_iso):
+    """does exactly what it says on the tin"""
     try:
         molkg, pressure = df_iso["molkg"], df_iso["pressure"]
     except:
         molkg, pressure = df_iso["molkg"], df_iso["# pressure"]
-    try:
-        if pressure.str.contains("C").any():
-            pressure_stripped = pressure.str.rpartition("-")[2]
-            pressure_stripped.name = "pressure"
-            return molkg, pressure_stripped
-    except:
-        return molkg, pressure
+    return molkg, pressure
 
 def DSLangmuir(ab, k1, qsat1, k2, qsat2):
     k1ab, k2ab = k1 * ab, k2 * ab
@@ -60,10 +59,10 @@ def try_curvefit(DSLangmuir, pressure, molkg, p0, maxfev = 2000):
         p0 = np.array([np.nan, np.nan, np.nan, np.nan])
     return p0
 
-def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7): 
+def iterative_DS_Langmuir(df_iso, k1_its=8, q_its=8, q1_value=0.7, maxfev = 3000): 
     "Generates various p0 starting values, then generates curvefits for all of them"
-    qlinspace = np.linspace(0.5, 4, q_its)
-    klogspace = np.logspace(2, -12, k1_its)
+    qlinspace = np.linspace(0.3, 4, q_its)
+    klogspace = np.logspace(1, -12, k1_its)
     molkg, pressure = return_molkg_pressure(df_iso)
     p0_array = np.zeros([4, k1_its * q_its * q_its])
     m = 0 #helper variable
@@ -73,7 +72,7 @@ def iterative_DS_Langmuir(df_iso, k1_its=7, q_its=7, q1_value=0.7):
         for k in range(0, k1_its):
             for l in range (0, q_its):
                 p0 = np.array([klogspace[i], q1_value, klogspace[k], qlinspace[l]])
-                p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = 2000)
+                p0_array[:, m] = try_curvefit(DSLangmuir, pressure, molkg, p0=p0, maxfev = maxfev)
                 m = m + 1
     return(p0_array)
 
