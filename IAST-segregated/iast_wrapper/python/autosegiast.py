@@ -209,8 +209,7 @@ def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
     return 0;
 
-def automatic_no_mols_seg_iast(temp, p0_lookup,names, max_no_mols = 5, low_no_frac = 10, high_no_frac = 20):
-    mols = np.arange(2, max_no_mols +1)
+def automatic_no_mols_seg_iast(temp, p0_lookup,names, mols, max_no_mols = 5, low_no_frac = 10, high_no_frac = 20):
     for no_molecules in mols:
         if no_molecules > 3:
             no_gas_fractions = high_no_frac
@@ -221,12 +220,14 @@ def automatic_no_mols_seg_iast(temp, p0_lookup,names, max_no_mols = 5, low_no_fr
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 def main():
     temp = 600
-    #no_molecules = 6
-    #no_gas_fractions = 25
+    start_mol = 5
+    no_molecules = 5
+    mols = np.arange(start_mol, no_molecules + 1)
+    #no_gas_fractions = 251
     
     p0_lookup, names = p0_dict(temp)
     #print(names)
-    automatic_no_mols_seg_iast(temp, p0_lookup, names)
+    automatic_no_mols_seg_iast(temp, p0_lookup, names, mols)
     #mix_combi = get_mix_combinations(no_molecules, names)
     #gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
     #automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
