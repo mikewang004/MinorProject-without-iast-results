@@ -227,7 +227,7 @@ def main():
     mols = np.arange(start_mol, no_molecules + 1) 
     p0_lookup, names = p0_dict(temp)
     #print(names)
-    mix_combi = get_mix_combinations(no_molecules, names, 0, 4)
+    mix_combi = get_mix_combinations(no_molecules, names, 1, 8)
     automatic_no_mols_seg_iast(temp, p0_lookup, names, mols, mix_combi)
     #gas_frac = get_frac_permutations(no_molecules, no_gas_fractions)
     #automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
