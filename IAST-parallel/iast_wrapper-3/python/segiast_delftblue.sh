@@ -1,8 +1,20 @@
+#SBATCH --job-name="IAST"
+#SBATCH --partition=compute
+#SBATCH --time=24:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=8GB
 
+#SBATCH -N 1
+#SBATCH --export=ALL
+echo $SLURM_JOBID > jobid
+valhost=$SLURM_JOB_NODELIST
+echo $valhost > hostname
 module load slurm
 module load 2022r2
-module load py-numpy 
+module load py-numpy
 module load py-scipy
 module load py-matplotlib
-srun -n 1 --mem-per-cpu=8GB --time=24:00:00 --partition=compute python3 autosegiast.py --job-name="autosegiast-delftblue-600K-5mols"
-echo "Done!"
+echo "Starting autosegiast with sbatch"
+python autosegiast.py
+echo "autosegiast complete"
