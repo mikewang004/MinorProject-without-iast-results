@@ -225,8 +225,8 @@ def main():
     p0_lookup, names = p0_dict(temp)
     temp = 550
     start_mol = 2
-    no_molecules = 5
-    mix_combi = get_mix_combinations(no_molecules, names, 1, 1)
+    no_molecules = 6
+    mix_combi = get_mix_combinations(no_molecules, names, 1, 4)
     automatic_no_mols_seg_iast(temp, p0_lookup, names, mols, mix_combi)
 
 

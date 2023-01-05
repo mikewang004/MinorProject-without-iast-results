@@ -223,10 +223,10 @@ def automatic_no_mols_seg_iast(temp, p0_lookup,names, mols, mix_combi, max_no_mo
 def main():
     mols = np.arange(start_mol, no_molecules + 1) 
     p0_lookup, names = p0_dict(temp)
-    temp = 550
-    start_mol = 2
+    temp = 600
+    start_mol = 5
     no_molecules = 5
-    mix_combi = get_mix_combinations(no_molecules, names, 1, 1)
+    mix_combi = get_mix_combinations(no_molecules, names, 7, 8)
     automatic_no_mols_seg_iast(temp, p0_lookup, names, mols, mix_combi)
 
 
