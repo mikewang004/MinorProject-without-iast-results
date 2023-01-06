@@ -68,7 +68,7 @@ def write_wrapper(temp, start_mol, no_molecules, total_no_parallelisation):
     rename_template_seg_iast(False)
 
 def rename_template_seg_iast(to_txt):
-    "to txt == True -> from .sh to .txt; to txt == False -> from .txt to .sh"
+    "to txt == True -> converts from .sh to .txt; to txt == False -> from .txt to .sh"
     str1 = "iast_wrapper_template/python/segiast_delftblue.sh"
     str2 = "iast_wrapper_template/python/segiast_delftblue.txt"
     if to_txt == False:
