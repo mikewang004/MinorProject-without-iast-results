@@ -150,7 +150,7 @@ def input_wrapper_langmuir():
 #name = "22mC5"
 #paths = "../../../Raspa/%s/%s-%dout.txt" %(name, name, temp)
 def main():
-    temp = 450
+    temp = 480
     auto_fit_plot_Langmuir(temp, calc_all=True)
     #input_wrapper_langmuir()
     #molkg, pressure = return_molkg_pressure(df.read_csv("/home/mike/Documents/uni/alice/Final_project/MinorProject/Raspa/outputs/3mC5/3mC5-600out.txt"))

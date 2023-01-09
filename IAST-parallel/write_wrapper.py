@@ -42,15 +42,15 @@ def loop_over_list(data, start, end=None):
 def modify_autosegiast(path, temp, startno_molecules, no_molecules, itr, total_no_parallelisation):
     with open("autosegiast-template.py", "r+") as file:
         data = file.readlines()
-    startnum = loop_over_list(data, "def main():")
+    startnum = loop_over_list(data, "            no_gas_fractions = low_no_frac")
     del data[startnum]
-    data.insert(startnum, "    temp = %d\n" %(temp))
-    startnum = loop_over_list(data, "    p0_lookup, names = p0_dict(temp)")
+    data.insert(startnum, "        mix_combi = get_mix_combinations(no_molecules, names, %d, %d)\n" %(itr, total_no_parallelisation))
+    startnum = loop_over_list(data, "def main():")
     for i in range(0, 3):
         del data[startnum]
-    data.insert(startnum, "    mix_combi = get_mix_combinations(no_molecules, names, %d, %d)\n" %(itr, total_no_parallelisation))
     data.insert(startnum, "    no_molecules = %d\n" %(no_molecules)) #does not work with \t instead of 4 spaces
     data.insert(startnum, "    start_mol = %d\n" %(startno_molecules))
+    data.insert(startnum, "    temp = %d\n" %(temp))
     os.remove(path)
     with open(path, "w") as file:
         for num, line in enumerate(data, 1):
@@ -79,9 +79,9 @@ def rename_template_seg_iast(to_txt):
         os.rename(str2, str1)
 def main():
     temp = 550 
-    start_mol = 2 #lower bound of how many molecules there shoudl be in a mixture
+    start_mol = 5 #lower bound of how many molecules there shoudl be in a mixture
     no_molecules = 5 #upper bound of how many molecules should be in a mixture
-    total_no_parallelisation = 16 #total number of parallel processes
+    total_no_parallelisation = 10 #total number of parallel processes
     write_wrapper(temp, start_mol, no_molecules, total_no_parallelisation)
 
 if __name__ == "__main__":

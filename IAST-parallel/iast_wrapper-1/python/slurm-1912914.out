@@ -1,0 +1,40 @@
+Autoloading python/3.8.12
+Autoloading python/3.8.12
+Autoloading python/3.8.12
+Autoloading py-six/1.15.0
+Autoloading python/3.8.12
+Autoloading python/3.8.12
+Autoloading libjpeg-turbo/2.1.0
+Autoloading python/3.8.12
+Autoloading zlib/1.2.11
+Autoloading python/3.8.12
+Autoloading py-six/1.15.0
+Autoloading python/3.8.12
+Autoloading intel-mkl/2020.4.304
+Autoloading py-setuptools/58.2.0
+Autoloading python/3.8.12
+Autoloading intel-mkl/2020.4.304
+Autoloading py-numpy/1.19.5-intel-mkl
+Autoloading py-pybind11/2.6.2
+Autoloading python/3.8.12
+Autoloading freetype/2.11.0
+Autoloading libpng/1.6.37
+Autoloading py-cycler/0.10.0
+Autoloading py-kiwisolver/1.3.2
+Autoloading py-numpy/1.19.5-intel-mkl
+Autoloading py-pillow/8.0.0
+Autoloading py-pyparsing/2.4.7
+Autoloading py-python-dateutil/2.8.2
+Autoloading py-setuptools/58.2.0
+Autoloading python/3.8.12
+Autoloading qhull/2020.2
+Starting autosegiast with sbatch
+Traceback (most recent call last):
+  File "autosegiast.py", line 235, in <module>
+    main()  
+  File "autosegiast.py", line 229, in main
+    p0_lookup, names = p0_dict(temp)
+  File "autosegiast.py", line 38, in p0_dict
+    with open("../..new_p0/p0_values-%d.txt" %temp) as file:
+FileNotFoundError: [Errno 2] No such file or directory: '../..new_p0/p0_values-400.txt'
+autosegiast complete

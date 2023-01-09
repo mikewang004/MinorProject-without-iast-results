@@ -53,7 +53,8 @@ def DSLangmuir(ab, k1, qsat1, k2, qsat2):
 def get_mix_combinations(no_mixture, names, parallel_no, max_parallel):
     "Returns all possible combinations from a list of mixtures"
     perms = list(combinations(sorted(sorted(names), key=str.upper), no_mixture))
-    del perms[::3]
+    #del perms[::3]
+    print(len(perms))
     return perms[int((parallel_no-1)/max_parallel*len(perms)):int(parallel_no/max_parallel*len(perms))]
 
 
@@ -212,22 +213,22 @@ def automatic_temp_seg_iast(temp_list, p0_lookup, mix_combi, gas_frac):
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
     return 0;
 
-def automatic_no_mols_seg_iast(temp, p0_lookup,names, mols, mix_combi, max_no_mols = 5, low_no_frac = 10, high_no_frac = 20):
+def automatic_no_mols_seg_iast(temp, p0_lookup,names, mols, max_no_mols = 5, low_no_frac = 10, high_no_frac = 20):
     for no_molecules in mols:
         if no_molecules > 3:
             no_gas_fractions = high_no_frac
         else:
             no_gas_fractions = low_no_frac
+        mix_combi = get_mix_combinations(no_molecules, names, 4, 10)
         gas_frac = get_frac_permutations(int(no_molecules), int(no_gas_fractions))
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac)
 def main():
     temp = 550
-    p0_lookup, names = p0_dict(temp)
-    start_mol = 2
+    start_mol = 5
     no_molecules = 5
-    mix_combi = get_mix_combinations(no_molecules, names, 10, 16)
+    p0_lookup, names = p0_dict(temp)
     mols = np.arange(start_mol, no_molecules + 1) 
-    automatic_no_mols_seg_iast(temp, p0_lookup, names, mols, mix_combi)
+    automatic_no_mols_seg_iast(temp, p0_lookup, names, mols)
 
 
 if __name__ == "__main__":

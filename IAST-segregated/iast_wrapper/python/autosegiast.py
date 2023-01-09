@@ -189,12 +189,18 @@ def seg_iast_one_combi_loop(temp, p0_lookup, mix_combi, gas_frac, no_molecules):
         move_segiast_dotf_output(output_path, gas_frac[i], no_molecules)
     return 0;
 
+def zip_delete_dir(path):
+    shutil.make_archive(path, 'zip', path)
+    shutil.rmtree(path)
+    
 def automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac, no_molecules):
     "Computes seg-iast all possbile combinations of [n] molecules."
     no_mol_iter = np.shape(mix_combi)
     for i in range(0, no_mol_iter[0]):
         seg_iast_one_combi_loop(temp, p0_lookup, mix_combi[i], gas_frac, no_molecules)
+        zip_delete_dir(try_folder_path(temp, mix_combi[i]))
     return 0;
+
 
 
 def automatic_no_mols_seg_iast(temp, p0_lookup,names, mols, path = "../../automated_output", low_no_frac = 10, high_no_frac = 20):
@@ -207,8 +213,8 @@ def automatic_no_mols_seg_iast(temp, p0_lookup,names, mols, path = "../../automa
         gas_frac = get_frac_permutations(int(no_molecules), int(no_gas_fractions))
         automatic_seg_iast(temp, p0_lookup, mix_combi, gas_frac, no_molecules)
 def main():
-    temp = 600
-    start_mol = 5
+    temp = 450
+    start_mol = 2
     no_molecules = 5
     #username = "mikewang"
     mols = np.arange(start_mol, no_molecules + 1)
